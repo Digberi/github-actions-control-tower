@@ -42,7 +42,10 @@
     "demo:cleanup": "node scripts/demo-controller.mjs cleanup",
     "check:heavy": "node scripts/heavy-gates.mjs G13 green && node scripts/heavy-gates.mjs G19 green && node scripts/heavy-gates.mjs G20 green && node scripts/heavy-gates.mjs G24 green && node scripts/heavy-gates.mjs G26 green && node scripts/heavy-gates.mjs G27 green",
     "test:postgres": "PG_REQUIRED=1 node --test tests/postgres.test.mjs",
-    "check:types": "tsc --noEmit --allowJs --checkJs --target es2022 --module nodenext --moduleResolution nodenext src/*.mjs"
+    "check:types": "tsc --noEmit --allowJs --checkJs --target es2022 --module nodenext --moduleResolution nodenext src/*.mjs",
+    "test:property": "node --test tests/property.test.mjs",
+    "nightly:soak": "node scripts/soak.mjs 20",
+    "nightly:mutation": "node scripts/mutation-proof.mjs"
   },
   "dependencies": {
     "pg": "8.23.1"
