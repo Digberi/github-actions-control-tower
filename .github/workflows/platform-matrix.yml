@@ -1,0 +1,55 @@
+name: "12 · Real OS and Node Compatibility Matrix"
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "green: portable paths, red: POSIX-only assumption fails on Windows"
+        type: choice
+        options: [green, red]
+        default: green
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  portability:
+    name: "G07 · ${{ matrix.os }} / Node ${{ matrix.node }}"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 22
+          - os: ubuntu-latest
+            node: 24
+          - os: macos-latest
+            node: 22
+          - os: windows-latest
+            node: 22
+    env:
+      CI_DEMO_SCENARIO: ${{ inputs.mode == 'red' && 'matrix' || '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify actual OS portability
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/platform-check.mjs 2>&1 | tee g07-report.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: g07-${{ runner.os }}-node${{ matrix.node }}-${{ inputs.mode || 'green' }}
+          path: g07-report.txt
+          if-no-files-found: warn
+          retention-days: 7

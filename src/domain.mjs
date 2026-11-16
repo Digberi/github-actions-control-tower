@@ -36,7 +36,9 @@ export function makeOrderStore() {
         totalCents
       };
       orders.set(order.orderId, order);
-      if (key !== undefined) keyed.set(key, { fingerprint: JSON.stringify(items), order });
+      if (key !== undefined) {
+        keyed.set(key, { fingerprint: JSON.stringify(items), order });
+      }
       return order;
     },
     get(id) {

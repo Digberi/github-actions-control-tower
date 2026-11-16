@@ -78,6 +78,11 @@ export function createApp({ store = makeOrderStore() } = {}) {
         return order ? send(res, 200, order) : send(res, 404, { error: "not_found" });
       }
       metrics.errors++;
+      // Isolated E2E failure injection: a wrong fallback response for unknown routes.
+      // CI_DEMO_SCENARIO is never enabled in ordinary PR/release workflows.
+      if (process.env.CI_DEMO_SCENARIO === "e2e") {
+        return send(res, 200, { error: "not_found" });
+      }
       return send(res, 404, { error: "not_found" });
     } catch (error) {
       metrics.errors++;
