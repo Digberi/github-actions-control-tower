@@ -1,0 +1,123 @@
+name: "Reusable · Ephemeral kind Deployment"
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: "kind · ${{ inputs.environment }} · digest · rollout · smoke"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Verify immutable digest (no rebuild)
+        env:
+          IMAGE: ${{ inputs.image }}
+        run: |
+          node scripts/k8s-render.mjs "$IMAGE" > /dev/null
+          echo "Image reference: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+      - name: Create ephemeral Kubernetes
+        uses: helm/kind-action@v1.14.0
+        with:
+          cluster_name: control-tower
+      - name: Pull image using scoped GitHub token
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          kubectl create secret docker-registry ghcr-pull \
+            --docker-server=ghcr.io \
+            --docker-username="$GITHUB_ACTOR" \
+            --docker-password="$GHCR_TOKEN"
+          kubectl patch serviceaccount default -p '{"imagePullSecrets":[{"name":"ghcr-pull"}]}'
+      - name: Apply K8s deployment from exact digest
+        env:
+          IMAGE: ${{ inputs.image }}
+        run: |
+          kubectl apply -f infra/k8s/service.json
+          node scripts/k8s-render.mjs "$IMAGE" | kubectl apply -f -
+          kubectl rollout status deployment/control-tower --timeout=180s
+          actual="$(kubectl get deploy control-tower -o jsonpath='{.spec.template.spec.containers[0].image}')"
+          test "$actual" = "$IMAGE"
+          echo "G24/G29: digest equality and rollout succeeded" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify HTTP readiness through Kubernetes Service
+        run: |
+          kubectl port-forward service/control-tower 18080:3000 > /tmp/control-tower-port-forward.log 2>&1 &
+          proxy=$!
+          trap 'kill "$proxy" || true; kubectl describe pod -l app=control-tower || true' EXIT
+          for attempt in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:18080/health/ready; then
+              echo "G29: real pod readiness and service HTTP smoke PASSED" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+      - name: "G30/G31 · Force broken rollout, preserve traffic, undo without rebuild"
+        env:
+          ORIGINAL_IMAGE: ${{ inputs.image }}
+        run: |
+          # Existing replicas must remain ready (maxUnavailable=0) while the
+          # candidate manifest has a syntactically valid but unavailable digest.
+          bad_image="${ORIGINAL_IMAGE%@sha256:*}@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          kubectl set image deployment/control-tower "orders-api=$bad_image"
+          kubectl port-forward service/control-tower 18080:3000 > /tmp/control-tower-rollout.log 2>&1 &
+          proxy=$!
+          trap 'kill "$proxy" || true; kubectl describe deployment control-tower || true' EXIT
+          sleep 4
+          errors=0
+          for attempt in $(seq 1 25); do
+            curl --max-time 3 --fail --silent http://127.0.0.1:18080/health/ready > /dev/null || errors=$((errors + 1))
+            sleep 1
+          done
+          echo "G30: unavailable responses during bad rollout = $errors/25" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$errors" -ne 0 ]; then
+            kubectl rollout undo deployment/control-tower || true
+            exit 1
+          fi
+          # This is a real failing Kubernetes rollout, not a pretend red test.
+          if kubectl rollout status deployment/control-tower --timeout=25s; then
+            echo "Expected broken rollout unexpectedly succeeded" >&2
+            exit 1
+          fi
+          kubectl rollout undo deployment/control-tower
+          kubectl rollout status deployment/control-tower --timeout=150s
+          restored="$(kubectl get deploy control-tower -o jsonpath='{.spec.template.spec.containers[0].image}')"
+          test "$restored" = "$ORIGINAL_IMAGE"
+          curl --max-time 10 --fail --silent http://127.0.0.1:18080/health/ready
+          echo "G31: rollback restored original digest and healthy service" >> "$GITHUB_STEP_SUMMARY"
+      - name: Write deployment evidence
+        if: always()
+        env:
+          IMAGE: ${{ inputs.image }}
+          TARGET: ${{ inputs.environment }}
+        run: |
+          mkdir -p reports
+          node -e 'const fs=require("fs"); const record={source:"GITHUB_REAL_KIND",environment:process.env.TARGET,image:process.env.IMAGE,runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA,timestamp:new Date().toISOString()}; fs.writeFileSync("reports/deployment.json",JSON.stringify(record,null,2)+"\n")'
+          kubectl get deployments,pods,services -o wide > reports/k8s-state.txt || true
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: kind-evidence-${{ inputs.environment }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 7

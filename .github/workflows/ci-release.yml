@@ -86,3 +86,13 @@ jobs:
             sleep 1
           done
           exit 1
+  staging-kind:
+    name: "G29 · Actual kind staging deployment"
+    needs: publish
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      image: ${{ needs.publish.outputs.image }}
+      environment: demo-staging

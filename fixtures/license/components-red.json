@@ -1,0 +1,6 @@
+{
+  "components": [
+    { "name": "orders-demo", "license": "MIT" },
+    { "name": "incompatible-example", "license": "GPL-3.0-only" }
+  ]
+}

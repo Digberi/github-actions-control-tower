@@ -9,16 +9,30 @@ on:
         required: true
         default: happy
         options: [happy, unit, integration, contract, architecture, security, performance]
+      gate:
+        description: "Optional Gxx gate, overrides legacy scenario"
+        type: choice
+        required: true
+        default: none
+        options: [none, G05, G08, G10, G15, G16, G19, G20, G24, G25, G26, G27]
+      mode:
+        description: "Green is a passing gate; red is a real job failure"
+        type: choice
+        required: true
+        default: green
+        options: [green, red]
 
 permissions:
   contents: read
 
 jobs:
   demonstration:
-    name: "Scenario · ${{ inputs.scenario }}"
+    name: "Gate ${{ inputs.gate }} · ${{ inputs.mode }} · ${{ inputs.scenario }}"
     runs-on: ubuntu-latest
     env:
       CI_DEMO_SCENARIO: ${{ inputs.scenario }}
+      DEMO_GATE: ${{ inputs.gate }}
+      DEMO_MODE: ${{ inputs.mode }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -30,6 +44,10 @@ jobs:
       - name: Execute selected real gate
         shell: bash
         run: |
+          if [ "$DEMO_GATE" != none ]; then
+            node scripts/demo-controller.mjs case --id "$DEMO_GATE" --mode "$DEMO_MODE" --target github --session "${GITHUB_RUN_ID}"
+            exit $?
+          fi
           case "$CI_DEMO_SCENARIO" in
             happy) npm run check ;;
             unit) npm run test:unit ;;
@@ -40,11 +58,20 @@ jobs:
             performance) npm run check:performance ;;
             *) exit 2 ;;
           esac
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: gate-evidence-${{ inputs.gate }}-${{ inputs.mode }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Summarize demonstrator
         if: always()
         run: |
           echo "## Classroom scenario: $CI_DEMO_SCENARIO" >> "$GITHUB_STEP_SUMMARY"
-          if [ "$CI_DEMO_SCENARIO" = happy ]; then
+          if [ "$DEMO_GATE" != none ]; then
+            echo "Gate $DEMO_GATE mode $DEMO_MODE (red means intentional real exit 1)" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$CI_DEMO_SCENARIO" = happy ]; then
             echo "Expected: GREEN" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "Expected: RED (intentional)" >> "$GITHUB_STEP_SUMMARY"

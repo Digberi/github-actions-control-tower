@@ -1,0 +1,4 @@
+{
+  "staging": { "image": "ghcr.io/digberi/github-actions-control-tower@sha256:4db00595a95a405bc6f306f99c780e7a972dfe27b340150007551c3b876701b9" },
+  "production": { "image": "ghcr.io/digberi/github-actions-control-tower@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+}

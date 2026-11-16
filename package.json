@@ -16,6 +16,8 @@
     "check:workflows": "node scripts/gates.mjs workflows",
     "check:performance": "node scripts/gates.mjs performance",
     "test:unit": "node --test tests/unit.test.mjs",
+    "check:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 tests/unit.test.mjs",
+    "check:sbom": "npm sbom --sbom-format cyclonedx | node scripts/verify-sbom.mjs",
     "test:integration": "node --test tests/integration.test.mjs",
     "test:e2e": "node --test tests/e2e.test.mjs",
     "test": "node --test tests/*.test.mjs",
@@ -26,6 +28,18 @@
     "demo:contract": "node scripts/demo.mjs contract",
     "demo:architecture": "node scripts/demo.mjs architecture",
     "demo:security": "node scripts/demo.mjs security",
-    "demo:performance": "node scripts/demo.mjs performance"
+    "demo:performance": "node scripts/demo.mjs performance",
+    "demo:preflight": "node scripts/demo-controller.mjs preflight",
+    "demo:list": "node scripts/demo-controller.mjs list",
+    "demo:case": "node scripts/demo-controller.mjs case",
+    "demo:show": "node scripts/demo-controller.mjs show",
+    "demo:report": "node scripts/demo-controller.mjs report",
+    "demo:cleanup": "node scripts/demo-controller.mjs cleanup",
+    "check:heavy": "node scripts/heavy-gates.mjs G19 green && node scripts/heavy-gates.mjs G20 green && node scripts/heavy-gates.mjs G24 green && node scripts/heavy-gates.mjs G26 green && node scripts/heavy-gates.mjs G27 green",
+    "test:postgres": "PG_REQUIRED=1 node --test tests/postgres.test.mjs",
+    "check:types": "tsc --noEmit --allowJs --checkJs --target es2022 --module nodenext --moduleResolution nodenext src/*.mjs"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
   }
 }

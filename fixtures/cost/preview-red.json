@@ -1,0 +1,7 @@
+{
+  "source": "PULUMI_PREVIEW_FIXTURE",
+  "resourceChanges": [
+    { "urn": "urn:pulumi:demo::order-api::aws:ec2/instance:Instance::api", "op": "update", "monthlyDeltaUsd": 25 },
+    { "urn": "urn:pulumi:demo::order-api::aws:rds/instance:Instance::db", "op": "create", "monthlyDeltaUsd": 160 }
+  ]
+}
