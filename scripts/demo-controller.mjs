@@ -45,6 +45,7 @@ function printHelp() {
     "  npm run demo:list",
     "  npm run demo:case -- --id G10 --mode red --target local",
     "  npm run demo:case -- --id G10 --mode green --target local",
+    "  npm run demo:case -- --id G27 --mode red --target prepared",
     "  npm run demo:show -- --id G27",
     "  npm run demo:report",
     "  npm run demo:cleanup -- --scope SESSION_ID --dry-run",
@@ -81,8 +82,23 @@ function runCase() {
   if (!test || !["green", "red"].includes(mode)) {
     throw new Error("Unknown ID/mode. Use demo:list.");
   }
-  if (!["local", "github"].includes(target)) {
-    throw new Error("Supported targets: local, github; prepared evidence via demo:show");
+  if (!["local", "github", "prepared"].includes(target)) {
+    throw new Error("Supported targets: local, github, prepared");
+  }
+  if (target === "prepared") {
+    const source = liveEvidence[id];
+    const url = typeof source === "string"
+      ? (mode === "red" ? source : null)
+      : source?.[mode];
+    if (!url) {
+      throw new Error("No verified pre-recorded remote run for " + id + " " + mode);
+    }
+    process.stdout.write(JSON.stringify({
+      source: "PREPARED_VERIFIED_GITHUB_RUN", gate: id, mode,
+      workflowRunUrl: url,
+      note: "Read-only link to an earlier real job; no new gate was executed."
+    }, null, 2) + "\n");
+    return;
   }
   if (target === "github" && process.env.GITHUB_ACTIONS !== "true") {
     throw new Error("GitHub target requires a real GitHub Actions runner");

@@ -52,9 +52,11 @@ jobs:
             *@sha256:*) ;;
             *) echo "No registry digest available: $immutable"; exit 1 ;;
           esac
-          echo "image=$immutable" >> "$GITHUB_OUTPUT"
-          echo "name=$image" >> "$GITHUB_OUTPUT"
-          echo "sha256=${immutable#*@}" >> "$GITHUB_OUTPUT"
+          {
+            echo "image=$immutable"
+            echo "name=$image"
+            echo "sha256=${immutable#*@}"
+          } >> "$GITHUB_OUTPUT"
           echo "## Release image" >> "$GITHUB_STEP_SUMMARY"
           echo "$immutable" >> "$GITHUB_STEP_SUMMARY"
       - name: G23 · Sigstore-backed SLSA image provenance attestation
