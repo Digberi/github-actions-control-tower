@@ -19,7 +19,7 @@
 
 **[Відкрити опубліковану інтерактивну демонстрацію →](https://digberi.github.io/github-actions-control-tower/)**
 
-- Вибери один із шести сценаріїв (happy, contract, security, performance, approval, rollout).
+- Вибери один із шести сюжетів або один із 18 окремих gate-сценаріїв (включно з G03/G04/G07/G09).
 - Клікни на етап, щоб подивитися список гейтів.
 - Схема показує **цільову архітектуру**, не стверджує, що гейт уже запущено.
 - Workflow [pages.yml](.github/workflows/pages.yml) публікує цю сторінку на GitHub Pages
@@ -77,7 +77,7 @@ curl -X POST http://localhost:3000/orders \
 та idempotency key. Без БД застосунок працює in-memory; у PR окрема job
 з PostgreSQL service container перевіряє concurrent retries і rollback.
 
-## Керований сценарій лектора (14 парних гейтів, 28 варіантів)
+## Керований сценарій лектора (18 парних гейтів, 36 варіантів)
 
 ~~~bash
 npm run demo:preflight
@@ -96,6 +96,9 @@ npm run demo:cleanup -- --scope lecture --dry-run
 `exit 1`, робить job червоною та зберігає evidence як artifact.
 Для вибору Gxx відкрий **Actions → Controlled Red / Green → Run workflow**.
 Фікстури OIDC — локальні RS256 підписи, **не** справжні GitHub JWT або AWS STS.
+Із 18 пар дві (G03/G04) вимагають окремого `quality:bootstrap`; решта
+16 виконуються без цього toolchain. Для готових результатів G03/G04/G07
+доступний `--target prepared` з реально перевіреними RED/GREEN run URLs.
 
 ## Демонстрація RED / GREEN без редагування репозиторію
 
@@ -140,6 +143,8 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 | `09 · Trivy Image Vulnerability Scan` | scheduled/manual | справжній CVE scan image@sha256, HIGH/CRITICAL exit 1 + JSON evidence |
 | `10 · Real OpenAPI Compatibility` | PR, manual green/red | oasdiff перевіряє spec на breaking changes |
 | `11 · YAML and Dockerfile Linters` | PR, manual | реальний yamllint + Hadolint; actionlint містить ShellCheck |
+| `12 · Real OS and Node Compatibility Matrix` | PR, manual green/red | Ubuntu Node 22/24, macOS 22, Windows 22; керований Windows-only RED |
+| `13 · Real ESLint Prettier and TypeScript` | PR, manual G03/G04 green/red | ізольовано встановлені реальні інструменти й machine-readable reports |
 
 Після першого push:
 

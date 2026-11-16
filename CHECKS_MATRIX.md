@@ -1,8 +1,8 @@
 # G01–G32 — reality check
 
 This matrix distinguishes **local implementation** from **verified remote execution**.
-Three major pull requests have been merged on 2026-11-16. Real runner
-evidence includes [PR #3](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394030),
+Multiple implementation pull requests have been merged on 2026-11-16 (through PR #8). Real runner
+evidence includes [PR #8](https://github.com/Digberi/github-actions-control-tower/pull/8),
 [Sigstore + kind release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325),
 [real linter](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391)
 and [blocking Trivy CVEs](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840).
@@ -16,13 +16,13 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 |---|---|---|---|
 | G01 | actionlint | READY + REMOTE | official actionlint container, failed first PR then corrected, green rerun |
 | G02 | yamllint/ShellCheck/Hadolint | READY + REMOTE | [yamllint and Hadolint green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391), actual two prior lint failures; ShellCheck embedded in actionlint |
-| G03 | ESLint/Prettier | PARTIAL | JS syntax + whitespace hygiene |
-| G04 | TypeScript typecheck | PLANNED | demo API currently plain JS |
+| G03 | ESLint/Prettier | READY NARROW + REMOTE RED/GREEN | real ESLint 9 and Prettier 3 on source + isolated style fixture; [RED exit 1 + artifact](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276) (`eqeqeq`, `semi`, formatting) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179); not full-repo lint |
+| G04 | TypeScript typecheck | READY DTO + REMOTE RED/GREEN | actual `tsc --noEmit` strict on typed order DTO, [RED TS2322 + artifact](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179); API remains ESM JavaScript |
 | G05 | Unit tests | LOCAL + REMOTE | node:test on pricing/storage; happy release verified |
 | G06 | Coverage threshold | READY + REMOTE | node:test lines ≥80%, locally measured 82.61%, green PR job |
-| G07 | Node/platform matrix | PARTIAL | Node 22 and 24 PR unit matrix; no OS matrix |
+| G07 | Node/platform matrix | READY REAL MATRIX + REMOTE RED/GREEN | real [GREEN four runners](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799): Ubuntu Node 22/24, macOS Node 22, Windows Node 22. [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867): Windows fails on POSIX-only separator, other 3 pass; every job uploads evidence |
 | G08 | Postgres integration | READY + REMOTE | PostgreSQL 16 service + concurrent transactional idempotency test green; skipped locally without DB |
-| G09 | API E2E | READY + REMOTE | real HTTP order lifecycle in PR E2E job |
+| G09 | API E2E | READY + REMOTE GREEN / LOCAL RED | real HTTP order lifecycle in [PR #8](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382585); isolated RED changes unknown-route status 404→200, actual assertion failure verified locally; remote RED pending |
 | G10 | API backward compatibility | READY + REMOTE RED/GREEN | Real OpenAPI 3.0 oasdiff; explicit `--fail-on ERR` fixed [false-green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898787400). [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220) |
 | G11 | Pact consumer contract | READY CONSUMER + REMOTE | independent HTTP consumer old response contract, verified GH PR job; not Pact yet |
 | G12 | Event/schema compatibility | OPTIONAL | no event bus in demo |
@@ -38,7 +38,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
 | G23 | Attestation/provenance | READY REAL + REMOTE | trusted release GitHub Sigstore provenance and independent gh attestation verify both passed in [release 43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
 | G24 | Immutable promotion | READY KIND + REMOTE | verified real GHCR digest identical in Docker and kind deployment; no production |
-| G25 | Performance smoke | READY K6 + REMOTE | [k6 PR run 43896867157](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157) passed real p95 + error rate thresholds with report |
+| G25 | Performance smoke | READY K6 + REMOTE RED/GREEN | [k6 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157); [k6 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43900813599) intentionally induced p95 ~1.6s vs 800ms threshold, artifact uploaded |
 | G26 | Cost budget preview | LOCAL FIXTURE | explicitly labeled synthetic Pulumi JSON and budget policy, no live cloud |
 | G27 | OIDC claims and STS | READY SYNTHETIC + REMOTE | signed local RSA JWT + reject tests; real [red](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) and [green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) workflow, no real STS |
 | G28 | Production approval | CONFIG | no production deploy; requires environment setup |
