@@ -7,6 +7,8 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| G05 property fuzz: arithmetic loses integer precision beyond MAX_SAFE_INTEGER; missing expected TypeError | 🔴 EXPECTED RED, real assertion + TAP artifact, required PR failed | [43967673291](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291) |
+| G05 property fuzz: Number.isSafeInteger guards both line and cumulative cents, 3,000 seeded examples | ✅ GREEN | [43967957021](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021) |
 | G20: real Trivy config scanner found 5 HIGH/CRITICAL in generated insecure Kubernetes Deployment, exit 1, JSON artifact | 🔴 EXPECTED RED | [43966679118](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118) |
 | G20: Trivy config scans actual `infra/k8s/*.json` with no HIGH/CRITICAL and artifact | ✅ GREEN | [43966807059](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059) |
 | G16: verified Gitleaks v8.30.1, temporary fake PAT detected, exit 1 + redacted JSON | 🔴 EXPECTED RED | [43965551427](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) |

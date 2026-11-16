@@ -198,6 +198,15 @@ jobs:
           node-version: 22
       - run: npm ci --ignore-scripts
       - run: npm run check:performance
+      - name: Short real HTTP soak precursor to scheduled extended checks
+        run: node scripts/soak.mjs 3
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quick-http-soak
+          path: reports/http-soak.json
+          if-no-files-found: warn
+          retention-days: 14
 
   image:
     name: "Container · Build and smoke"
@@ -237,10 +246,34 @@ jobs:
     with:
       mode: green
 
+  property:
+    name: "G05 · Seeded property fuzz and safe-integer invariants"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - name: Run seeded property suite with captured TAP evidence
+        run: |
+          mkdir -p reports
+          set -o pipefail
+          npm run test:property | tee reports/property-tests.tap
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: property-based-test-tap
+          path: reports/property-tests.tap
+          if-no-files-found: warn
+          retention-days: 14
+
   required:
     name: "Required · PR Gate"
     if: always()
-    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security, iac]
+    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security, iac, property]
     runs-on: ubuntu-latest
     steps:
       - name: Collect outcomes and enforce required checks
@@ -259,11 +292,12 @@ jobs:
           IMAGE: ${{ needs.image.result }}
           SECURITY: ${{ needs.security.result }}
           IAC: ${{ needs.iac.result }}
+          PROPERTY: ${{ needs.property.result }}
         run: |
           echo "## PR Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           printf '| Job | Result |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
           failed=0
-          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY IAC; do
+          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY IAC PROPERTY; do
             result="${!job}"
             printf '| %s | %s |\n' "$job" "$result" >> "$GITHUB_STEP_SUMMARY"
             if [ "$result" != success ]; then
