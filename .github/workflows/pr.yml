@@ -229,10 +229,18 @@ jobs:
       gate: all
       mode: green
 
+  iac:
+    name: "G20 · Trivy IaC (reusable)"
+    permissions:
+      contents: read
+    uses: ./.github/workflows/trivy-iac.yml
+    with:
+      mode: green
+
   required:
     name: "Required · PR Gate"
     if: always()
-    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security]
+    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security, iac]
     runs-on: ubuntu-latest
     steps:
       - name: Collect outcomes and enforce required checks
@@ -250,11 +258,12 @@ jobs:
           PERFORMANCE: ${{ needs.performance.result }}
           IMAGE: ${{ needs.image.result }}
           SECURITY: ${{ needs.security.result }}
+          IAC: ${{ needs.iac.result }}
         run: |
           echo "## PR Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           printf '| Job | Result |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
           failed=0
-          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY; do
+          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY IAC; do
             result="${!job}"
             printf '| %s | %s |\n' "$job" "$result" >> "$GITHUB_STEP_SUMMARY"
             if [ "$result" != success ]; then

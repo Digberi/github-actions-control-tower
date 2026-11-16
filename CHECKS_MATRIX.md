@@ -33,7 +33,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G17 | SAST | READY CODEQL + REMOTE | [CodeQL security-extended JS workflow success](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867239) |
 | G18 | SCA | READY NPM + REMOTE | real npm audit high+ found no vulnerabilities; PR gate green; full Trivy SCA remains |
 | G19 | License policy | READY REAL NPM + REMOTE RED/GREEN | Real `npm ci` and transitive installed `package.json` license inventory (14 actual); [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) ephemeral GPL policy input rejected, exit 1 + JSON; [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276) installed-dependency allowlist passes. Strict SPDX tokens; no license text verification. |
-| G20 | IaC/K8s policy | READY NARROW + REMOTE | JSON fixtures + real K8s Deployment security check green in PR, no OPA/Trivy yet |
+| G20 | IaC/K8s policy | READY TRIVY REAL + REMOTE RED/GREEN | [RED Trivy IaC](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118) found five HIGH/CRITICAL findings in ephemeral privileged Deployment (scanner exit 1, JSON artifact); [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059) scanned actual `infra/k8s` JSON manifests with no blocking findings. Custom policy fixtures remain available; OPA is not integrated. |
 | G21 | Image CVE scan | READY + REAL RED | [Trivy exit 1](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840) on immutable GHCR digest due HIGH/CRITICAL findings, real JSON evidence uploaded; needs CVE remediation to be green |
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
 | G23 | Attestation/provenance | READY REAL + REMOTE | trusted release GitHub Sigstore provenance and independent gh attestation verify both passed in [release 43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
@@ -45,7 +45,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G29 | Post-deploy smoke | READY KIND + REMOTE | kind real 2-pod deployment/readiness/Service HTTP smoke green |
 | G30 | Rolling/canary availability | READY KIND + REMOTE | kind maxUnavailable=0 + 25 HTTP checks during bad digest rollout, green |
 | G31 | Rollback | READY KIND + REMOTE | real failed rollout → kubectl rollout undo → original digest + smoke, green with artifact; no production |
-| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates all core checks and [real G16/G19 reusable security checks](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966017285); GitHub branch ruleset not configured. |
+| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates core checks and G16/G19/G20 real security reusable jobs (new G20 aggregate proof pending this PR); GitHub branch ruleset not configured. |
 
 The diagram in [docs/index.html](docs/index.html) intentionally shows the
 complete **target** from the implementation brief. A green visualization
