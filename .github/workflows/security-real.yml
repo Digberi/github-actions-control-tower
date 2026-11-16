@@ -1,0 +1,101 @@
+name: "14 · Real Secret and License Security Gates"
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      gate:
+        description: "Run only the selected security gate"
+        required: true
+        type: choice
+        options: [G16, G19]
+      mode:
+        description: "Green scans genuine sources; red adds an ephemeral synthetic violation"
+        required: true
+        type: choice
+        options: [green, red]
+        default: green
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: "G16 · Real Gitleaks scan"
+    if: github.event_name == 'pull_request' || inputs.gate == 'G16'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MODE: ${{ github.event_name == 'pull_request' && 'red' || inputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Install immutable, checksum-verified Gitleaks CLI
+        run: |
+          mkdir -p "$RUNNER_TEMP/gitleaks-bin"
+          curl --fail --location --retry 3 \
+            "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz" \
+            --output "$RUNNER_TEMP/gitleaks.tar.gz"
+          printf '%s  %s\n' \
+            '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' \
+            "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks-bin" gitleaks
+          "$RUNNER_TEMP/gitleaks-bin/gitleaks" version
+      - name: G16 · Scan actual repository or ephemeral leaked-token demo
+        run: |
+          mkdir -p reports
+          target="."
+          if [ "$MODE" = "red" ]; then
+            target="$RUNNER_TEMP/g16-synthetic"
+            mkdir -p "$target"
+            prefix='ghp_'
+            suffix='aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0uV1wX2'
+            printf 'demo_api_key=%s%s\n' "$prefix" "$suffix" > "$target/fixture.txt"
+          fi
+          set +e
+          "$RUNNER_TEMP/gitleaks-bin/gitleaks" dir "$target" \
+            --no-banner --redact=100 --report-format json \
+            --report-path "reports/g16-$MODE.json"
+          scan_code=$?
+          set -e
+          node scripts/g16-verdict.mjs "$MODE" "$scan_code" "reports/g16-$MODE.json"
+      - name: Upload actual scanner findings and verdict even when blocked
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: "g16-gitleaks-${{ github.run_id }}"
+          path: reports/g16-*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  licenses:
+    name: "G19 · Installed dependency license policy"
+    if: github.event_name == 'pull_request' || inputs.gate == 'G19'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MODE: ${{ github.event_name == 'pull_request' && 'red' || inputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install real locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: G19 · Evaluate actual installed dependency metadata
+        run: node scripts/license-policy.mjs "$MODE"
+      - name: Upload classified inventory, including denied packages
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0 # v7.0.1
+        with:
+          name: "g19-installed-licenses-${{ github.run_id }}"
+          path: reports/g19-*.json
+          if-no-files-found: warn
+          retention-days: 14

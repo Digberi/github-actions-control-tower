@@ -60,7 +60,7 @@ jobs:
           echo "## Release image" >> "$GITHUB_STEP_SUMMARY"
           echo "$immutable" >> "$GITHUB_STEP_SUMMARY"
       - name: G23 · Sigstore-backed SLSA image provenance attestation
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-name: ${{ steps.digest.outputs.name }}
           subject-digest: ${{ steps.digest.outputs.sha256 }}
