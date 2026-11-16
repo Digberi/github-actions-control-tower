@@ -35,7 +35,7 @@ jobs:
           mkdir -p reports
           docker run --rm --user "$(id -u):$(id -g)" \
             -v "$PWD/openapi:/specs:ro" tufin/oasdiff:v1.37.0 \
-            breaking --format markdown /specs/baseline.json "/specs/$candidate" \
+            breaking --fail-on ERR --format markdown /specs/baseline.json "/specs/$candidate" \
             > reports/oasdiff.md
       - name: Save compatibility evidence
         if: always()
