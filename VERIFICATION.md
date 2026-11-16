@@ -9,6 +9,7 @@ workflow runs, not screenshots or mocked JSON.
 | Controlled fixture: `contract` | **EXPECTED FAILURE** | [run 43889707611](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611) |
 | Controlled fixture: `happy` | **SUCCESS** | [run 43889811097](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097) |
 | GitHub Pages | **SUCCESS (rerun #2)** | [run 43889385204](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204) |
+| Heavy PR (actionlint, real PostgreSQL, npm SBOM/audit, coverage, policy matrix, Docker) | **SUCCESS** | [run 43894228150](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894228150) |
 
 ## Confirmed evidence
 
@@ -26,6 +27,12 @@ workflow runs, not screenshots or mocked JSON.
 - The live page was opened in a browser and tested: selecting `contract`
   and clicking `Tests & contracts` updated the downstream red state
   and the list of G08–G15 checks.
+- PR #1 first run correctly failed at actionlint with ShellCheck SC2034.
+  After fixing the unused Bash loop variables, a second actual runner
+  run finished with all jobs GREEN, including PostgreSQL 16 idempotency,
+  generated CycloneDX SBOM (with artifact), npm audit, Node 22/24,
+  coverage threshold, and aggregate Required gate.
+- PR #1 was squash-merged into main as `1b88a7373fd95c99d33a02c620b9053b0e1338f6`.
 
 ## Limits and follow-ups
 
@@ -36,6 +43,8 @@ workflow runs, not screenshots or mocked JSON.
 3. Pin all remaining GitHub Pages actions to supported full SHAs. The current
    checkout/setup-node pins work but GitHub warns about their Node 20
    runtime being forced to Node 24.
-4. These results do not assert production deployments, Kubernetes rollout,
-   OIDC role assumption, SBOM generation, attestations, vulnerability scans
-   or automatic rollback. See `IMPLEMENTATION_BRIEF.md`.
+4. Real CycloneDX SBOM and a separate PostgreSQL runner test are verified.
+   Real kind rollout/rollback requires a successful trusted release run and
+   will only be called verified when that run succeeds. No production,
+   OIDC role assumption, image attestation, or full CVE scan has been
+   evidenced. See `IMPLEMENTATION_BRIEF.md`.

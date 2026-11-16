@@ -64,7 +64,7 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
       </nav>
     </header>
-    <div class="notice" role="note"><strong>Це схема цільового heavy CI/CD, а не телеметрія реальних запусків.</strong> Перший робочий зріз уже має unit, integration, E2E, API contract, architecture, secret patterns, HTTP performance, Docker build/smoke та GitHub Pages. Решта запланованих гейтів описані в ТЗ як наступні етапи.</div>
+    <div class="notice" role="note"><strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong> Працюють реальні GitHub Actions з actionlint, Node 22/24, coverage, PostgreSQL, SCA/SBOM, GHCR та перевірками політик. Deploy у kind, rollout і rollback мають окреме фактичне evidence у Actions після trusted release. Окремі cost/license/OIDC перевірки використовують чітко synthetic fixtures; статус усіх G01–G32 дивись у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.</div>
     <section class="panel" aria-label="Інтерактивний CI/CD pipeline">
 <div id="cicd-tower-v1" class="ct-root">
   <style>
@@ -135,6 +135,17 @@
         <option value="performance">Погіршилась продуктивність</option>
         <option value="approval">Відхилено prod approval</option>
         <option value="rollout">Впав post-deploy smoke</option>
+        <option value="G05">G05 · unit pricing RED</option>
+        <option value="G08">G08 · HTTP integration RED</option>
+        <option value="G10">G10 · API contract RED</option>
+        <option value="G15">G15 · architecture cycle RED</option>
+        <option value="G16">G16 · secret pattern RED</option>
+        <option value="G19">G19 · license allowlist RED</option>
+        <option value="G20">G20 · Kubernetes policy RED</option>
+        <option value="G24">G24 · digest mismatch RED</option>
+        <option value="G25">G25 · HTTP p95 RED</option>
+        <option value="G26">G26 · estimated cost RED</option>
+        <option value="G27">G27 · OIDC claims RED</option>
       </select>
     </div>
   </div>
@@ -181,6 +192,13 @@
     <ul id="ct-info-list" class="ct-info-list" hidden></ul>
   </div>
   <div id="ct-result" class="ct-note" aria-live="polite">Симуляція: усі гейти пройдені, той самий digest просунуто у production.</div>
+  <div class="ct-note">
+    Запустити справжню job:
+    <a href="https://github.com/Digberi/github-actions-control-tower/actions/workflows/demo-scenarios.yml">
+      Actions → Controlled Red / Green → Run workflow
+    </a>
+    (обери gate та mode; RED повертає exit 1 і створює artifact).
+  </div>
   <div class="sr-only">Концептуальна схема майбутнього стенда. Це не статус реальних GitHub Actions прогонів.</div>
 
   <script>
@@ -208,6 +226,19 @@
       approval:{fail:"approval",text:"Staging зелений, але production approval відхилено → production deploy не стартує."},
       rollout:{fail:"production",text:"CI і staging зелені, але post-deploy smoke впав → recovery повертає попередній digest."}
     };
+    Object.assign(scenarios,{
+      G05:{fail:"code",text:"G05 unit RED: ціновий інваріант не виконується, required блокує merge."},
+      G08:{fail:"tests",text:"G08 integration RED: HTTP створення order повернуло неправильний status."},
+      G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний зафіксований RED run у GitHub."},
+      G15:{fail:"tests",text:"G15 architecture RED: у граф import додано цикл, gate завершується exit 1."},
+      G16:{fail:"security",text:"G16 synthetic canary відповідає secret pattern. Ніякого справжнього секрету в репозиторії немає."},
+      G19:{fail:"security",text:"G19 fixture має license поза allowlist. Це НЕ повний SBOM license scan."},
+      G20:{fail:"security",text:"G20 fixture має небезпечний Kubernetes securityContext; політика його відхиляє."},
+      G24:{fail:"release",text:"G24 staging digest ≠ production digest. Promotion має зупинитися до deploy."},
+      G25:{fail:"performance",text:"G25 ін'єкція затримки перевищує p95 1200ms. Це локальний HTTP smoke, не k6."},
+      G26:{fail:"performance",text:"G26 synthetic Pulumi preview Δcost перевищує навчальний бюджет."},
+      G27:{fail:"staging",text:"G27 локально підписаний RSA JWT має чужий OIDC subject. Цей gate не припускає cloud STS."}
+    });
     const ids=["pr","code","tests","security","performance","required","release","staging","approval","production","healthy","rollback"];
     let selected=null;
     function select(id){
@@ -232,9 +263,13 @@
         let state="green";
         if(id==="rollback")state=(key==="rollout")?"rollback":"skipped";
         else if(id==="healthy")state=(key==="happy")?"green":"skipped";
-        else if(failed==="tests"||failed==="security"||failed==="performance"){
+        else if(["code","tests","security","performance"].includes(failed)){
           if(id===failed)state="failed";
           if(["required","release","staging","approval","production"].includes(id))state=id==="required"?"failed":"skipped";
+        }else if(failed==="release"||failed==="staging"){
+          const downstream=failed==="release"?["staging","approval","production"]:["approval","production"];
+          if(id===failed)state="failed";
+          if(downstream.includes(id))state="skipped";
         }else if(failed==="approval"){
           if(id==="approval")state="failed";
           if(id==="production")state="skipped";
@@ -251,9 +286,9 @@
 
     </section>
     <section class="implementation" aria-label="Рівні реалізації">
-      <article><h3>Працює локально</h3><p>npm run check, тестові сценарії, контрольовані RED/GREEN.</p></article>
-      <article><h3>Workflow у репозиторії</h3><p>PR gates, матриця Node, build/smoke, GHCR і Pages. Збережено перевірені GREEN/RED прогони з прямими посиланнями вгорі.</p></article>
-      <article><h3>Доробка за ТЗ</h3><p>PostgreSQL, Pact, SAST, SCA, SBOM, provenance, Kubernetes, OIDC, approval, production rollout, rollback, policy/cost gates.</p></article>
+      <article><h3>11 пар RED/GREEN</h3><p>Контролер має 22 перевірені локальні варіанти. В GitHub кожен RED — справжній failed step + JSON evidence.</p></article>
+      <article><h3>Паралельні GitHub Jobs</h3><p>Node 22/24, PostgreSQL, actionlint, coverage, npm audit + CycloneDX, container, policy matrix та aggregated Required.</p></article>
+      <article><h3>Deep/Release</h3><p>Тимчасовий kind rollback і promotion до digest. Pact, CodeQL, Trivy, provenance, реальний Pulumi/OIDC/AWS — окремі етапи; 32/32 не заявлено.</p></article>
     </section>
     <footer class="foot">Demo mode не змінює production і не використовує cloud secrets. Симуляція відображає лише логіку проходження гейтів.</footer>
   </main>
