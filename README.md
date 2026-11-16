@@ -14,6 +14,8 @@
 Відкрий [docs/index.html](docs/index.html) у браузері: схема працює
 без npm, серверів, інтернету та сторонніх бібліотек.
 
+**[Відкрити опубліковану інтерактивну демонстрацію →](https://digberi.github.io/github-actions-control-tower/)**
+
 - Вибери один із шести сценаріїв (happy, contract, security, performance, approval, rollout).
 - Клікни на етап, щоб подивитися список гейтів.
 - Схема показує **цільову архітектуру**, не стверджує, що гейт уже запущено.
@@ -65,10 +67,10 @@ npm run demo:performance    # artificially slow response and p95 failure
 - [RED — зламаний контракт, відсутній `orderId`](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611).
 - [GREEN — GHCR release + smoke того самого digest](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385092).
 
-GitHub Pages поки **не ввімкнені у Settings → Pages**. [Перший
-workflow](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204)
-відпрацював і показав саме відсутність Pages site; після ввімкнення
-Actions як джерела потрібно повторно запустити `04 · Interactive HTML Demo`.
+GitHub Pages **увімкнено й перевірено в браузері**:
+[публічна сторінка](https://digberi.github.io/github-actions-control-tower/)
+опублікована успішним [workflow](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204)
+(повторний запуск після налаштування джерела).
 
 | Workflow | Trigger | Результат |
 |---|---|---|
@@ -88,7 +90,7 @@ Actions як джерела потрібно повторно запустити
 4. Для блокування merge налаштуй **branch protection / ruleset**
    і зроби `Required · PR Gate` обов'язковим. Сам workflow
    без цієї настройки merge не блокує.
-5. Увімкни GitHub Pages у Settings → Pages (Actions).
+5. Відкрий [інтерактивну схему](https://digberi.github.io/github-actions-control-tower/) та покажи, як вибір RED-сценарію зупиняє downstream jobs.
 
 **Безпека:** недовірений PR не має прав publish/deploy; `packages: write`
 є тільки в trusted `main` release job. Жодного AWS role або платного

@@ -8,7 +8,7 @@ workflow runs, not screenshots or mocked JSON.
 | Trusted build → GHCR → immutable staging smoke | **SUCCESS** | [run 43889385092](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385092) |
 | Controlled fixture: `contract` | **EXPECTED FAILURE** | [run 43889707611](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611) |
 | Controlled fixture: `happy` | **SUCCESS** | [run 43889811097](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097) |
-| GitHub Pages | **BLOCKED BY SETTINGS** | [run 43889385204](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204) |
+| GitHub Pages | **SUCCESS (rerun #2)** | [run 43889385204](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204) |
 
 ## Confirmed evidence
 
@@ -20,13 +20,17 @@ workflow runs, not screenshots or mocked JSON.
   `FAIL contract: Breaking response change: post /orders missing orderId:string`.
 - The happy job completed successfully using the same workflow and
   the `happy` input.
-- The Pages job reported `Get Pages site failed` and instructed to
-  enable the repository Pages site and configure its source to GitHub Actions.
+- The initial Pages attempt reported `Get Pages site failed`. After enabling
+  Pages via Settings with GitHub Actions as source, rerun #2 successfully
+  deployed [the live HTML site](https://digberi.github.io/github-actions-control-tower/).
+- The live page was opened in a browser and tested: selecting `contract`
+  and clicking `Tests & contracts` updated the downstream red state
+  and the list of G08–G15 checks.
 
 ## Limits and follow-ups
 
-1. Enable **Settings → Pages → Build and deployment → GitHub Actions**,
-   then rerun the Pages workflow.
+1. GitHub Pages is enabled and operational. Future changes under `docs/`
+   auto-trigger the Pages deployment workflow.
 2. Configure branch protection/ruleset for `Required · PR Gate` before
    claiming it physically blocks merge.
 3. Pin all remaining GitHub Pages actions to supported full SHAs. The current

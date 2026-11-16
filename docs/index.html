@@ -59,10 +59,12 @@
       <nav class="navigation" aria-label="Навігація проєкту">
         <a href="https://github.com/Digberi/github-actions-control-tower">Репозиторій</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions">Живі GitHub Actions</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097">GREEN прогін</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611">RED прогін</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
       </nav>
     </header>
-    <div class="notice" role="note"><strong>Це схема цільового heavy CI/CD, а не телеметрія реальних запусків.</strong> Перший робочий зріз уже має unit, integration, E2E, API contract, architecture, secret patterns, HTTP performance, Docker build/smoke та GitHub Pages. Решта 32 гейтів позначені в ТЗ як наступні етапи.</div>
+    <div class="notice" role="note"><strong>Це схема цільового heavy CI/CD, а не телеметрія реальних запусків.</strong> Перший робочий зріз уже має unit, integration, E2E, API contract, architecture, secret patterns, HTTP performance, Docker build/smoke та GitHub Pages. Решта запланованих гейтів описані в ТЗ як наступні етапи.</div>
     <section class="panel" aria-label="Інтерактивний CI/CD pipeline">
 <div id="cicd-tower-v1" class="ct-root">
   <style>
@@ -138,7 +140,7 @@
   </div>
 
   <div class="ct-rail" role="group" aria-label="Послідовність CI/CD pipeline">
-    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="pr"><span class="ct-node-title">① Pull request <span class="ct-node-meta">untrusted code · без cloud secrets</span></span></div></div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="pr"><span class="ct-node-title">1. Pull request <span class="ct-node-meta">untrusted code · без cloud secrets</span></span></div></div>
     <div class="ct-arrow">↓</div>
     <div class="ct-branch-title">Паралельні перевірки PR</div>
     <div class="ct-split" aria-hidden="true"></div>
@@ -150,16 +152,16 @@
     </div>
     <div class="ct-join" aria-hidden="true"></div>
     <div class="ct-arrow">↓</div>
-    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="required"><span class="ct-node-title">② Required checks · G32</span><span class="ct-node-meta">Хоча б один червоний → merge заблокований</span></div></div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="required"><span class="ct-node-title">2. Required checks · G32</span><span class="ct-node-meta">Хоча б один червоний → merge заблокований</span></div></div>
     <div class="ct-arrow">↓</div>
-    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="release"><span class="ct-node-title">③ Merge main → Build once → GHCR</span><span class="ct-node-meta">G21–G24 · scan, SBOM, attestation, immutable digest</span></div></div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="release"><span class="ct-node-title">3. Merge main → Build once → GHCR</span><span class="ct-node-meta">G21–G24 · scan, SBOM, attestation, immutable digest</span></div></div>
     <div class="ct-arrow">↓</div>
     <div class="ct-middle">
-      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="staging"><span class="ct-node-title">④ Deploy staging</span><span class="ct-node-meta">G27 + G29 · OIDC, migration, health & smoke</span></div>
-      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="approval"><span class="ct-node-title">⑤ Production approval</span><span class="ct-node-meta">G28 · GitHub Environment / reviewer</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="staging"><span class="ct-node-title">4. Deploy staging</span><span class="ct-node-meta">G27 + G29 · OIDC, migration, health & smoke</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="approval"><span class="ct-node-title">5. Production approval</span><span class="ct-node-meta">G28 · GitHub Environment / reviewer</span></div>
     </div>
     <div class="ct-arrow">↓</div>
-    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="production"><span class="ct-node-title">⑥ Production · той самий digest</span><span class="ct-node-meta">G30 · rolling / canary, availability, post-deploy checks</span></div></div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="production"><span class="ct-node-title">6. Production · той самий digest</span><span class="ct-node-meta">G30 · rolling / canary, availability, post-deploy checks</span></div></div>
     <div class="ct-arrow">↓</div>
     <div class="ct-middle">
       <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="healthy"><span class="ct-node-title">✓ Healthy release</span><span class="ct-node-meta">спостереження · метрики · deployment record</span></div>
@@ -250,7 +252,7 @@
     </section>
     <section class="implementation" aria-label="Рівні реалізації">
       <article><h3>Працює локально</h3><p>npm run check, тестові сценарії, контрольовані RED/GREEN.</p></article>
-      <article><h3>Workflow у репозиторії</h3><p>PR gates, матриця Node, build/smoke, реліз до GHCR і GitHub Pages. Реальні GitHub прогони слід перевірити після першого push.</p></article>
+      <article><h3>Workflow у репозиторії</h3><p>PR gates, матриця Node, build/smoke, GHCR і Pages. Збережено перевірені GREEN/RED прогони з прямими посиланнями вгорі.</p></article>
       <article><h3>Доробка за ТЗ</h3><p>PostgreSQL, Pact, SAST, SCA, SBOM, provenance, Kubernetes, OIDC, approval, production rollout, rollback, policy/cost gates.</p></article>
     </section>
     <footer class="foot">Demo mode не змінює production і не використовує cloud secrets. Симуляція відображає лише логіку проходження гейтів.</footer>
