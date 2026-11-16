@@ -1,7 +1,18 @@
 name: "14 · Real Secret and License Security Gates"
 
 on:
-  pull_request:
+  workflow_call:
+    inputs:
+      gate:
+        description: "Select both checks or a single gate"
+        required: false
+        type: string
+        default: all
+      mode:
+        description: "Controlled demo mode"
+        required: false
+        type: string
+        default: green
   workflow_dispatch:
     inputs:
       gate:
@@ -22,11 +33,11 @@ permissions:
 jobs:
   gitleaks:
     name: "G16 · Real Gitleaks scan"
-    if: github.event_name == 'pull_request' || inputs.gate == 'G16'
+    if: inputs.gate == 'all' || inputs.gate == 'G16'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      MODE: ${{ github.event_name == 'pull_request' && 'green' || inputs.mode }}
+      MODE: ${{ inputs.mode }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -74,11 +85,11 @@ jobs:
 
   licenses:
     name: "G19 · Installed dependency license policy"
-    if: github.event_name == 'pull_request' || inputs.gate == 'G19'
+    if: inputs.gate == 'all' || inputs.gate == 'G19'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      MODE: ${{ github.event_name == 'pull_request' && 'green' || inputs.mode }}
+      MODE: ${{ inputs.mode }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

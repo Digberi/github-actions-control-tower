@@ -15,7 +15,8 @@ Compound expressions are allowed only if every constituent is approved;
 unknown WITH exceptions fail closed. The RED demonstration injects one
 ephemeral GPL-3.0-only policy input, not an installed dependency.
 
-Both gates run for every PR. Run workflow_dispatch for a selected gate with
+Both gates run for every PR through the reusable workflow invoked by
+`01 · PR Quality Gates` and included in its `Required · PR Gate` aggregator. Run workflow_dispatch for a selected gate with
 mode=red or mode=green to generate controlled, inspectable outcomes. Do not
 confuse demonstration RED runs with real credential leakage. Neither gate
 requires cloud secrets or write-scoped GitHub tokens.
