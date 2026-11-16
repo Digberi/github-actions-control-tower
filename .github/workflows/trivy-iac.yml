@@ -1,0 +1,93 @@
+name: "15 · Trivy Kubernetes IaC Policy"
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        description: "Controlled red/green Trivy policy scenario"
+        required: false
+        type: string
+        default: green
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "green scans actual manifests; red scans a generated insecure Kubernetes fixture"
+        required: true
+        type: choice
+        options: [green, red]
+        default: green
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-config:
+    name: "G20 · Real Kubernetes misconfiguration policy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MODE: ${{ inputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - id: target
+        name: Select actual Kubernetes configs or generate ephemeral insecure red fixture
+        run: |
+          mkdir -p reports
+          if [ "$MODE" = "red" ]; then
+            mkdir -p "$RUNNER_TEMP/g20-insecure"
+            {
+              echo 'apiVersion: apps/v1'
+              echo 'kind: Deployment'
+              echo 'metadata:'
+              echo '  name: deliberately-insecure'
+              echo 'spec:'
+              echo '  replicas: 1'
+              echo '  selector:'
+              echo '    matchLabels: {app: insecure}'
+              echo '  template:'
+              echo '    metadata:'
+              echo '      labels: {app: insecure}'
+              echo '    spec:'
+              echo '      hostNetwork: true'
+              echo '      hostPID: true'
+              echo '      containers:'
+              echo '        - name: vulnerable'
+              echo '          image: alpine:latest'
+              echo '          securityContext:'
+              echo '            privileged: true'
+              echo '            allowPrivilegeEscalation: true'
+            } > "$RUNNER_TEMP/g20-insecure/deployment.yaml"
+            echo "directory=$RUNNER_TEMP/g20-insecure" >> "$GITHUB_OUTPUT"
+          else
+            echo 'directory=infra/k8s' >> "$GITHUB_OUTPUT"
+          fi
+      - id: scan
+        name: G20 · Run actual Trivy IaC scanner
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        continue-on-error: true
+        with:
+          scan-type: config
+          scan-ref: ${{ steps.target.outputs.directory }}
+          format: json
+          output: reports/g20-trivy-${{ env.MODE }}.json
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          hide-progress: true
+      - name: Enforce real findings and fail closed if scanner malfunctioned
+        if: always() && steps.target.outcome == 'success'
+        env:
+          SCAN_OUTCOME: ${{ steps.scan.outcome }}
+        run: node scripts/trivy-config-verdict.mjs "$MODE" "$SCAN_OUTCOME" "reports/g20-trivy-$MODE.json"
+      - name: Upload Trivy findings and structured verdict even if the policy blocks
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: "g20-real-iac-${{ github.run_id }}"
+          path: reports/g20-*.json
+          if-no-files-found: warn
+          retention-days: 14

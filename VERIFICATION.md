@@ -7,6 +7,8 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| G20: real Trivy config scanner found 5 HIGH/CRITICAL in generated insecure Kubernetes Deployment, exit 1, JSON artifact | 🔴 EXPECTED RED | [43966679118](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118) |
+| G20: Trivy config scans actual `infra/k8s/*.json` with no HIGH/CRITICAL and artifact | ✅ GREEN | [43966807059](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059) |
 | G16: verified Gitleaks v8.30.1, temporary fake PAT detected, exit 1 + redacted JSON | 🔴 EXPECTED RED | [43965551427](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) |
 | G19: actual installed npm license inventory (14 packages + one temporary GPL input), exit 1 + JSON | 🔴 EXPECTED RED | [43965551427](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) |
 | G16/G19: actual Gitleaks repo scan + installed npm dependency licenses | ✅ GREEN BOTH | [43965642276](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276) |
