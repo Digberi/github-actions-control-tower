@@ -16,7 +16,7 @@ jobs:
     name: "G01 · actionlint (real YAML/action semantics)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Lint every workflow with official actionlint container
@@ -26,10 +26,10 @@ jobs:
     name: "Syntax · Architecture · Contract · Secrets · Workflow policy"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
@@ -48,12 +48,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [G19, G20, G24, G26, G27]
+        gate: [G13, G19, G20, G24, G26, G27]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
       - name: Run narrow policy with controlled fixture
@@ -65,10 +65,10 @@ jobs:
     name: "G18/G22 · SCA audit and real CycloneDX SBOM"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
@@ -106,15 +106,28 @@ jobs:
       DATABASE_URL: postgres://ci:ci-demo-only@127.0.0.1:5432/orders
       PG_REQUIRED: "1"
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run test:postgres
+
+  consumer:
+    name: "G11 · Independent HTTP consumer compatibility"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm run test:consumer
 
   unit:
     name: "Unit · Node ${{ matrix.node }}"
@@ -124,10 +137,10 @@ jobs:
       matrix:
         node: [22, 24]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -138,10 +151,10 @@ jobs:
     name: "G06 · Unit coverage threshold ≥80%"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
@@ -151,10 +164,10 @@ jobs:
     name: "Integration · Real HTTP"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
@@ -164,10 +177,10 @@ jobs:
     name: "E2E · Order lifecycle"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
@@ -177,10 +190,10 @@ jobs:
     name: "Performance · HTTP p95"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
@@ -190,7 +203,7 @@ jobs:
     name: "Container · Build and smoke"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Build production image
@@ -210,7 +223,7 @@ jobs:
   required:
     name: "Required · PR Gate"
     if: always()
-    needs: [actionlint, static, policy, supply_chain, postgres, unit, coverage, integration, e2e, performance, image]
+    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image]
     runs-on: ubuntu-latest
     steps:
       - name: Collect outcomes and enforce required checks
@@ -220,6 +233,7 @@ jobs:
           POLICY: ${{ needs.policy.result }}
           SUPPLY_CHAIN: ${{ needs.supply_chain.result }}
           POSTGRES: ${{ needs.postgres.result }}
+          CONSUMER: ${{ needs.consumer.result }}
           UNIT: ${{ needs.unit.result }}
           COVERAGE: ${{ needs.coverage.result }}
           INTEGRATION: ${{ needs.integration.result }}
@@ -230,7 +244,7 @@ jobs:
           echo "## PR Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           printf '| Job | Result |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
           failed=0
-          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE; do
+          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE; do
             result="${!job}"
             printf '| %s | %s |\n' "$job" "$result" >> "$GITHUB_STEP_SUMMARY"
             if [ "$result" != success ]; then

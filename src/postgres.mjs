@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import pg from "pg";
 import { calculateTotal } from "./domain.mjs";
+import { readFileSync } from "node:fs";
 
 /**
  * PostgreSQL-backed repository. Real transactions, real uniqueness/locking,
@@ -11,14 +12,10 @@ export function makePostgresOrderStore(connectionString) {
   const pool = new pg.Pool({ connectionString, max: 5, connectionTimeoutMillis: 3000 });
   const store = {
     async migrate() {
-      await pool.query(`CREATE TABLE IF NOT EXISTS demo_orders (
-        id uuid PRIMARY KEY,
-        idempotency_key text UNIQUE,
-        request_hash text NOT NULL,
-        total_cents bigint NOT NULL CHECK (total_cents >= 0),
-        status text NOT NULL DEFAULT 'created',
-        created_at timestamptz NOT NULL DEFAULT now()
-      )`);
+      const migration = readFileSync(
+        new URL("../migrations/001_orders.sql", import.meta.url), "utf8"
+      );
+      await pool.query(migration);
     },
     async ready() {
       try {

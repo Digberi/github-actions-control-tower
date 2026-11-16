@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 COPY src ./src
+COPY migrations ./migrations
 ENV NODE_ENV=production
 ENV PORT=3000
 USER node

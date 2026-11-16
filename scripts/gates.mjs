@@ -54,6 +54,15 @@ async function architecture() {
   if (scenario === "architecture") {
     edges.get("src/domain.mjs").push("src/app.mjs");
   }
+  if (scenario === "boundary") {
+    edges.get("src/domain.mjs").push("src/server.mjs");
+  }
+  for (const [from, imports] of edges) {
+    if (from === "src/domain.mjs" &&
+        imports.some(to => to === "src/app.mjs" || to === "src/server.mjs")) {
+      fail("G14 architectural boundary violation: domain must not import transport");
+    }
+  }
   const visiting = new Set();
   const visited = new Set();
   function dfs(node, path) {

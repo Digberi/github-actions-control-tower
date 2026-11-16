@@ -1,0 +1,68 @@
+name: "07 · Real k6 Performance Gate"
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        description: "Real k6 GREEN or intentional threshold RED"
+        required: true
+        default: green
+        options: [green, red]
+
+permissions:
+  contents: read
+
+jobs:
+  performance:
+    name: "G25 · k6 p95 < 800ms / error rate < 1%"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MODE: ${{ inputs.mode || 'green' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
+      - run: npm ci --ignore-scripts
+      - name: Start real HTTP service on loopback
+        run: |
+          if [ "$MODE" = red ]; then
+            echo "CI_DEMO_SCENARIO=performance" >> "$GITHUB_ENV"
+            CI_DEMO_SCENARIO=performance node src/server.mjs > /tmp/k6-api.log 2>&1 &
+          else
+            node src/server.mjs > /tmp/k6-api.log 2>&1 &
+          fi
+          echo "$!" > /tmp/k6-api.pid
+          for _ in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3000/health; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:3000/health
+      - name: Execute measured k6 threshold gate
+        env:
+          DURATION: 12s
+          TARGET_URL: http://127.0.0.1:3000
+        run: |
+          mkdir -p reports
+          k6 run --summary-export reports/k6-summary.json perf/k6-smoke.js
+      - name: Preserve report even when threshold fails
+        if: always()
+        run: |
+          echo "G25 k6 scenario: $MODE" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f reports/k6-summary.json ]; then
+            node -e 'const j=require("./reports/k6-summary.json"); console.log(JSON.stringify({p95:j.metrics.http_req_duration?.values?.["p(95)"],errorRate:j.metrics.http_req_failed?.values?.rate,requests:j.metrics.http_reqs?.values?.count}))' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f /tmp/k6-api.pid ]; then kill "$(cat /tmp/k6-api.pid)" || true; fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: k6-${{ inputs.mode || 'green' }}-summary
+          path: reports/k6-summary.json
+          if-no-files-found: warn
+          retention-days: 7

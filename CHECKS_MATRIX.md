@@ -23,21 +23,21 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G08 | Postgres integration | READY + REMOTE | PostgreSQL 16 service + concurrent transactional idempotency test green; skipped locally without DB |
 | G09 | API E2E | LOCAL | real HTTP order lifecycle |
 | G10 | API backward compatibility | PARTIAL + REMOTE | JSON response contract; verified failed `orderId` fixture; no oasdiff |
-| G11 | Pact consumer contract | PLANNED | no Pact consumer yet |
+| G11 | Pact consumer contract | LOCAL CONSUMER, REMOTE PENDING | independent HTTP consumer uses old response contract; deliberately missing orderId gives red; not Pact yet |
 | G12 | Event/schema compatibility | OPTIONAL | no event bus in demo |
-| G13 | DB migration safety | PLANNED | no database yet |
-| G14 | Architecture boundaries | PARTIAL | local imports restricted to src |
+| G13 | DB migration safety | LOCAL, REMOTE PENDING | actual applied 001_orders.sql with additive-only validator vs red drop-column fixture; static policy is narrow |
+| G14 | Architecture boundaries | LOCAL, REMOTE PENDING | domain-to-transport import forbidden, real source graph + red fixture |
 | G15 | Dependency cycles | LOCAL | source import graph DFS + red fixture |
 | G16 | Gitleaks/secret scanning | PARTIAL | basic patterns + generated synthetic red case |
-| G17 | SAST | PLANNED | no CodeQL/Semgrep |
+| G17 | SAST | IMPLEMENTED, REMOTE PENDING | separate CodeQL security-extended JS workflow, uploaded GitHub code-scanning alerts |
 | G18 | SCA | READY NPM + REMOTE | real npm audit high+ found no vulnerabilities; PR gate green; full Trivy SCA remains |
 | G19 | License policy | LOCAL FIXTURE | explicit allowlist on synthetic component licenses; no actual dependency classifier |
 | G20 | IaC/K8s policy | READY NARROW + REMOTE | JSON fixtures + real K8s Deployment security check green in PR, no OPA/Trivy yet |
-| G21 | Image CVE scan | PLANNED | Docker builds/smokes only |
+| G21 | Image CVE scan | CONFIG, REMOTE PENDING | Trivy manual/scheduled workflow scans immutable GHCR digest, blocking HIGH/CRITICAL threshold, JSON artifact |
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
-| G23 | Attestation/provenance | PLANNED | no signed verification yet |
+| G23 | Attestation/provenance | IMPLEMENTED, REMOTE PENDING | trusted release GitHub Sigstore provenance, pushes registry attestation, gh attestation verify |
 | G24 | Immutable promotion | READY KIND + REMOTE | verified real GHCR digest identical in Docker and kind deployment; no production |
-| G25 | Performance smoke | PARTIAL | local p95 measurement, no k6 |
+| G25 | Performance smoke | LOCAL + REAL K6 REMOTE PENDING | local HTTP p95 and independent real k6 workflow (PR/dispatch, thresholds, summary artifact) |
 | G26 | Cost budget preview | LOCAL FIXTURE | explicitly labeled synthetic Pulumi JSON and budget policy, no live cloud |
 | G27 | OIDC claims and STS | READY SYNTHETIC + REMOTE | signed local RSA JWT + reject tests; real [red](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) and [green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) workflow, no real STS |
 | G28 | Production approval | CONFIG | no production deploy; requires environment setup |

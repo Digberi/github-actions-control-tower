@@ -19,6 +19,7 @@
     "check:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 tests/unit.test.mjs",
     "check:sbom": "npm sbom --sbom-format cyclonedx | node scripts/verify-sbom.mjs",
     "test:integration": "node --test tests/integration.test.mjs",
+    "test:consumer": "node --test tests/consumer.test.mjs",
     "test:e2e": "node --test tests/e2e.test.mjs",
     "test": "node --test tests/*.test.mjs",
     "check": "npm run check:syntax && npm run check:architecture && npm run check:contract && npm run check:secrets && npm test && npm run check:performance",
@@ -35,7 +36,7 @@
     "demo:show": "node scripts/demo-controller.mjs show",
     "demo:report": "node scripts/demo-controller.mjs report",
     "demo:cleanup": "node scripts/demo-controller.mjs cleanup",
-    "check:heavy": "node scripts/heavy-gates.mjs G19 green && node scripts/heavy-gates.mjs G20 green && node scripts/heavy-gates.mjs G24 green && node scripts/heavy-gates.mjs G26 green && node scripts/heavy-gates.mjs G27 green",
+    "check:heavy": "node scripts/heavy-gates.mjs G13 green && node scripts/heavy-gates.mjs G19 green && node scripts/heavy-gates.mjs G20 green && node scripts/heavy-gates.mjs G24 green && node scripts/heavy-gates.mjs G26 green && node scripts/heavy-gates.mjs G27 green",
     "test:postgres": "PG_REQUIRED=1 node --test tests/postgres.test.mjs",
     "check:types": "tsc --noEmit --allowJs --checkJs --target es2022 --module nodenext --moduleResolution nodenext src/*.mjs"
   },

@@ -67,7 +67,10 @@ export function createApp({ store = makeOrderStore() } = {}) {
         const code = process.env.CI_DEMO_SCENARIO === "integration" ? 503 : 201;
         if (code === 201) metrics.ordersCreated++;
         else metrics.errors++;
-        return send(res, code, order);
+        const response = process.env.CI_DEMO_SCENARIO === "consumer"
+          ? { status: order.status, totalCents: order.totalCents }
+          : order;
+        return send(res, code, response);
       }
       const match = url.pathname.match(/^\/orders\/([a-f0-9-]+)$/i);
       if (req.method === "GET" && match) {

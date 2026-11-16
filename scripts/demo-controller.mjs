@@ -17,6 +17,9 @@ const cases = {
   G05: { title: "Unit pricing invariant", command: "test:unit", failure: "unit" },
   G08: { title: "HTTP integration invariant", command: "test:integration", failure: "integration" },
   G10: { title: "Backward-compatible API response", command: "check:contract", failure: "contract" },
+  G11: { title: "Independent HTTP consumer contract", command: "test:consumer", failure: "consumer" },
+  G13: { title: "Expand-only migration safety", heavy: true },
+  G14: { title: "Domain to transport import forbidden", command: "check:architecture", failure: "boundary" },
   G15: { title: "Source import cycle", command: "check:architecture", failure: "architecture" },
   G16: { title: "Secret pattern in synthetic fixture", command: "check:secrets", failure: "security" },
   G19: { title: "License allowlist policy", heavy: true },
@@ -28,7 +31,11 @@ const cases = {
 };
 
 const liveEvidence = {
-  G10: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611"
+  G10: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611",
+  G27: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037"
+  }
 };
 
 function printHelp() {
@@ -59,7 +66,7 @@ function preflight() {
     memoryGiB: Number((os.totalmem() / 1024 ** 3).toFixed(1)),
     docker: { available: docker.status === 0 },
     githubCliAuthenticated: gh.status === 0,
-    localDemoChecks: ["G05", "G08", "G10", "G15", "G16", "G19", "G20", "G24", "G25", "G26", "G27"]
+    localDemoChecks: Object.keys(cases)
   };
   process.stdout.write(JSON.stringify(statuses, null, 2) + "\n");
   if (!statuses.node.ready) process.exitCode = 1;
