@@ -10,6 +10,7 @@
 14 advanced demo-сценаріїв — у [IMPLEMENTATION_BRIEF.md](IMPLEMENTATION_BRIEF.md).
 Поточний стан по кожному G01–G32 — [CHECKS_MATRIX.md](CHECKS_MATRIX.md).
 Фактичні GitHub прогони — [VERIFICATION.md](VERIFICATION.md).
+**Для проведення лекції:** [18-хвилинний сценарій із прямими посиланнями на GREEN/RED jobs](LECTURE_DEMO.md).
 
 ## Інтерактивна візуалізація
 
@@ -115,6 +116,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 | `08 · CodeQL Static Analysis` | PR, main, manual | GitHub SAST security-extended query pack |
 | `09 · Trivy Image Vulnerability Scan` | scheduled/manual | справжній CVE scan image@sha256, HIGH/CRITICAL exit 1 + JSON evidence |
 | `10 · Real OpenAPI Compatibility` | PR, manual green/red | oasdiff перевіряє spec на breaking changes |
+| `11 · YAML and Dockerfile Linters` | PR, manual | реальний yamllint + Hadolint; actionlint містить ShellCheck |
 
 Після першого push:
 

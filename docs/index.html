@@ -68,10 +68,14 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157">k6: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867239">CodeQL: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325">Sigstore provenance</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939">oasdiff: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220">oasdiff: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy CVE: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/LECTURE_DEMO.md">Сценарій live demo</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
       </nav>
     </header>
-    <div class="notice" role="note"><strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong> Реальні GitHub Actions перевірили actionlint, Node 22/24, coverage, PostgreSQL, SCA/SBOM, GHCR та політики. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938">kind rollout + 25 HTTP samples + rollback пройшли на GitHub runner</a>, з окремим evidence artifact. Cost/license/OIDC використовують чітко synthetic fixtures; статус усіх G01–G32 дивись у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.</div>
+    <div class="notice" role="note"><strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong> Реальні GitHub Actions перевірили actionlint, Node 22/24, coverage, PostgreSQL, SCA/SBOM, CodeQL, k6, GHCR, oasdiff та політики. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938">Kind rollout + 25 HTTP samples + rollback успішні</a>; <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy реально заблокував HIGH/CRITICAL CVEs</a>. Cost/license/OIDC використовують чітко synthetic fixtures; статус G01–G32 дивись у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.</div>
     <section class="panel" aria-label="Інтерактивний CI/CD pipeline">
 <div id="cicd-tower-v1" class="ct-root">
   <style>

@@ -1,62 +1,76 @@
-# Real GitHub Actions evidence
+# Перевірені GitHub Actions — evidence ledger
 
-Verified on 2026-11-16 (Europe/Kyiv). These links are actual public GitHub
-workflow runs, not screenshots or mocked JSON.
+Станом на **16.11.2026**. Нижче — справжні публічні GitHub workflow runs,
+не намальовані позначки, не локальні симуляції. Для кожної демонстрації
+червоний статус може бути **очікуваним** — дивись причину та JSON/Markdown
+артефакти, а не лише кольорову іконку.
 
-| Flow | Outcome | URL |
+| Механізм | Результат | Справжній GitHub run |
 |---|---|---|
-| Trusted build → GHCR → immutable staging smoke | **SUCCESS** | [run 43889385092](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385092) |
-| Controlled fixture: `contract` | **EXPECTED FAILURE** | [run 43889707611](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611) |
-| Controlled fixture: `happy` | **SUCCESS** | [run 43889811097](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097) |
-| GitHub Pages | **SUCCESS (rerun #2)** | [run 43889385204](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204) |
-| Heavy PR (actionlint, real PostgreSQL, npm SBOM/audit, coverage, policy matrix, Docker) | **SUCCESS** | [run 43894228150](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894228150) |
-| GHCR digest → 2-pod kind rollout/readiness → broken rollout → 25 HTTP checks → kubectl undo | **SUCCESS** | [run 43894401938](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938) |
-| G27 OIDC policy / synthetic invalid subject | **EXPECTED FAILURE, artifact saved** | [run 43894863175](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) |
-| G27 OIDC policy / synthetic valid subject | **SUCCESS, artifact saved** | [run 43894983037](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) |
-| Interactive Pages after adding 11 gate selector options | **SUCCESS** | [run 43894552684](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894552684) |
+| PR #1: actionlint, PostgreSQL, тестова матриця, coverage, SBOM/audit, Docker, required job | ✅ GREEN | [43894228150](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894228150) |
+| PR #2: незалежний consumer, міграція, boundaries, required checks | ✅ GREEN | [43896867056](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867056) |
+| PR #3: новий OpenAPI, Hadolint, yamllint, required suite | ✅ GREEN | [43898394030](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394030) |
+| G02: реальний yamllint + Hadolint (після виправлення Dockerfile) | ✅ GREEN | [43898394391](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391) |
+| G02: Hadolint помітив shell-form HEALTHCHECK | 🔴 EXPECTED FIX CYCLE | [43897556010](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897556010) |
+| G02: Hadolint помітив нечисловий USER | 🔴 EXPECTED FIX CYCLE | [43898053537](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898053537) |
+| G10: oasdiff OpenAPI nonbreaking candidate на PR | ✅ GREEN | [43898394017](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394017) |
+| G10: оasdiff видалено `orderId`, explicit `--fail-on ERR` | 🔴 EXPECTED RED | [43899543939](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939) |
+| G10: ручний сумісний OpenAPI після виправлення exit policy | ✅ GREEN | [43899598220](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220) |
+| G17: CodeQL security-extended | ✅ GREEN | [43898394012](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394012) |
+| G25: реальний k6 p95 + error rate | ✅ GREEN | [43896867157](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157) |
+| Trusted release: GHCR digest, Sigstore attestation, незалежне verify, kind rollout/rollback | ✅ GREEN | [43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
+| G21: Trivy виявив HIGH/CRITICAL у наявному immutable GHCR image, збережено JSON | 🔴 BLOCKED BY CVEs | [43898137840](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840) |
+| G27: синтетичний RS256 OIDC JWT з неправильним subject | 🔴 EXPECTED RED | [43894863175](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) |
+| G27: синтетичний RS256 OIDC JWT з дозволеним subject | ✅ GREEN | [43894983037](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) |
+| Старий JSON consumer contract: missing orderId | 🔴 EXPECTED RED | [43889707611](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611) |
+| Контрольне happy demo | ✅ GREEN | [43889811097](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097) |
+| GitHub Pages | ✅ PUBLISHED | [відкрити HTML](https://digberi.github.io/github-actions-control-tower/) |
 
-## Confirmed evidence
+## Supply chain та Kubernetes — що справді доведено
 
-- The container release was published to:
-  `ghcr.io/digberi/github-actions-control-tower@sha256:4db00595a95a405bc6f306f99c780e7a972dfe27b340150007551c3b876701b9`.
-- The staging-simulation job reports **the identical digest**, showing no
-  rebuild between publish and pull+smoke on an ephemeral runner.
-- The contract job failed with exit code 1 and the message:
-  `FAIL contract: Breaking response change: post /orders missing orderId:string`.
-- The happy job completed successfully using the same workflow and
-  the `happy` input.
-- The initial Pages attempt reported `Get Pages site failed`. After enabling
-  Pages via Settings with GitHub Actions as source, rerun #2 successfully
-  deployed [the live HTML site](https://digberi.github.io/github-actions-control-tower/).
-- The live page was opened in a browser and tested: selecting `contract`
-  and clicking `Tests & contracts` updated the downstream red state
-  and the list of G08–G15 checks.
-- PR #1 first run correctly failed at actionlint with ShellCheck SC2034.
-  After fixing the unused Bash loop variables, a second actual runner
-  run finished with all jobs GREEN, including PostgreSQL 16 idempotency,
-  generated CycloneDX SBOM (with artifact), npm audit, Node 22/24,
-  coverage threshold, and aggregate Required gate.
-- PR #1 was squash-merged into main as `1b88a7373fd95c99d33a02c620b9053b0e1338f6`.
-- The trusted release published digest
+- GHCR digest у [першому перевіреному kind release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938):
   `ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f`.
-  Two Kubernetes pods became available in real kind; rollout with an
-  intentionally nonexistent digest retained service availability; the
-  status command failed as intended, and `kubectl rollout undo` restored
-  the original digest. All corresponding steps and artifact succeeded.
-- G27 RED returned a genuine failing GitHub job, and both RED/GREEN runs
-  uploaded separate machine-readable artifacts. It tested cryptographically
-  signed **synthetic local** JWTs, not GitHub-issued credentials or real AWS.
+- Наступний trusted release [43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325)
+  створив реальну Sigstore/GitHub provenance attestation для immutable digest;
+  незалежний крок `gh attestation verify` завершився успішно.
+- Kind піднімає **реальний тимчасовий Kubernetes на GitHub runner**, Deployment
+  із двома репліками, readiness/liveness, Service HTTP. Невдалий rollout
+  з неіснуючим digest був виявлений; 25 HTTP проб перевірили доступність,
+  після чого `kubectl rollout undo` повернув попередній digest.
+  [Логи та deploy evidence](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938).
+- PostgreSQL 16 піднімається окремим service container у PR; перевіряються
+  транзакційна ідемпотентність та конкурентні повтори.
+- npm створює **реальний CycloneDX SBOM** і прикріплює його до run;
+  `npm audit --audit-level=high` є реальною перевіркою залежностей.
 
-## Limits and follow-ups
+## Червоні прогони — інтерпретація
 
-1. GitHub Pages is enabled and operational. Future changes under `docs/`
-   auto-trigger the Pages deployment workflow.
-2. Configure branch protection/ruleset for `Required · PR Gate` before
-   claiming it physically blocks merge.
-3. Pin all remaining GitHub Pages actions to supported full SHAs. The current
-   checkout/setup-node pins work but GitHub warns about their Node 20
-   runtime being forced to Node 24.
-4. Real CycloneDX SBOM, PostgreSQL, kind deployment, availability drill,
-   and kind rollback are verified by actual workflow runs. There is still
-   no production deployment, real OIDC role assumption, image attestation,
-   or full CVE image scan. See `IMPLEMENTATION_BRIEF.md`.
+1. **G21 Trivy** — реальний security finding на існуючому container image.
+   Scan крок завершився exit 1, проте job `upload-artifact` успішно зберіг
+   `trivy-image-cve-report`. Це **не зелений security gate**.
+2. **G27 OIDC** — криптографічно підписаний **синтетичний RSA JWT** перевіряється
+   офлайн за `iss/aud/sub/exp`. Це **не реальний AWS STS exchange**.
+3. **G02 Hadolint** — показовий fail → fix → fail наступного правила →
+   fix → green. Жоден результат не підмінявся.
+4. **G10 oasdiff** — ручний [перший RED attempt 43898787400](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898787400)
+   виявив підступний **false-green**: без `--fail-on ERR` oasdiff публікував
+   breaking-change report, але повертав exit 0. [PR #4](https://github.com/Digberi/github-actions-control-tower/pull/4)
+   додав explicit exit policy. Після нього [RED 43899543939](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939)
+   справді впав на breaking change, а [GREEN 43899598220](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220)
+   перевіряє сумісний контракт. Перший прогін — false-green teaching evidence,
+   не RED evidence.
+
+## Чесні межі
+
+- **GitHub Environments production approval (G28)** не налаштовано, бо
+  немає призначеного reviewer/prod-середовища. **Branch protection/ruleset
+  (G32)** ще не налаштовано: агрегувальний `Required · PR Gate` є, але
+  немає підтвердженої заборони merge на GitHub UI.
+- Deployment — **staging-like на ephemeral kind**, не AWS/production.
+  Один перевірений digest проходить kind; actual production promotion
+  із human approval немає.
+- G03/G04, Pact, Gitleaks, OPA, реальний Pulumi cost, cloud STS,
+  DAST/fuzzing/mutation та частина G01–G32 — **не реалізовані повністю**.
+  Деталі — у [матриці гейтів](CHECKS_MATRIX.md).
+- HTTP visualization — інтерактивна **модель** для пояснення причин/наслідків,
+  а доказ виконання — гіперпосилання на реальні GitHub run IDs.

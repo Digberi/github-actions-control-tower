@@ -1,11 +1,12 @@
 # G01–G32 — reality check
 
 This matrix distinguishes **local implementation** from **verified remote execution**.
-The initial push is published and three remote runs were verified on
-2026-11-16; see [VERIFICATION.md](VERIFICATION.md). The feature branch adds
-additional real runner jobs. They are now evidenced by successful
-[PR run 43894228150](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894228150)
-and [kind release 43894401938](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938).
+Three major pull requests have been merged on 2026-11-16. Real runner
+evidence includes [PR #3](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394030),
+[Sigstore + kind release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325),
+[real linter](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391)
+and [blocking Trivy CVEs](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840).
+See [VERIFICATION.md](VERIFICATION.md) for the run-by-run ledger.
 
 Legend: `LOCAL` = implemented and manually runnable, `PARTIAL` = some narrower
 behavior implemented, `PLANNED` = not yet implemented, `CONFIG` = dependent on
@@ -14,15 +15,15 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | ID | Target gate | First-cut status | Actual implementation / gap |
 |---|---|---|---|
 | G01 | actionlint | READY + REMOTE | official actionlint container, failed first PR then corrected, green rerun |
-| G02 | yamllint/ShellCheck/Hadolint | IMPLEMENTED, REMOTE PENDING | yamllint and Hadolint workflow; ShellCheck is embedded inside actionlint Docker |
+| G02 | yamllint/ShellCheck/Hadolint | READY + REMOTE | [yamllint and Hadolint green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391), actual two prior lint failures; ShellCheck embedded in actionlint |
 | G03 | ESLint/Prettier | PARTIAL | JS syntax + whitespace hygiene |
 | G04 | TypeScript typecheck | PLANNED | demo API currently plain JS |
 | G05 | Unit tests | LOCAL + REMOTE | node:test on pricing/storage; happy release verified |
 | G06 | Coverage threshold | READY + REMOTE | node:test lines ≥80%, locally measured 82.61%, green PR job |
 | G07 | Node/platform matrix | PARTIAL | Node 22 and 24 PR unit matrix; no OS matrix |
 | G08 | Postgres integration | READY + REMOTE | PostgreSQL 16 service + concurrent transactional idempotency test green; skipped locally without DB |
-| G09 | API E2E | LOCAL | real HTTP order lifecycle |
-| G10 | API backward compatibility | JSON REMOTE + OASDIFF PENDING | existing JSON response gate with verified red; new OpenAPI 3.0 + oasdiff separate workflow |
+| G09 | API E2E | READY + REMOTE | real HTTP order lifecycle in PR E2E job |
+| G10 | API backward compatibility | READY + REMOTE RED/GREEN | Real OpenAPI 3.0 oasdiff; explicit `--fail-on ERR` fixed [false-green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898787400). [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220) |
 | G11 | Pact consumer contract | READY CONSUMER + REMOTE | independent HTTP consumer old response contract, verified GH PR job; not Pact yet |
 | G12 | Event/schema compatibility | OPTIONAL | no event bus in demo |
 | G13 | DB migration safety | READY NARROW + REMOTE | actual applied 001_orders.sql with additive-only validator vs red drop-column fixture |
@@ -33,7 +34,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G18 | SCA | READY NPM + REMOTE | real npm audit high+ found no vulnerabilities; PR gate green; full Trivy SCA remains |
 | G19 | License policy | LOCAL FIXTURE | explicit allowlist on synthetic component licenses; no actual dependency classifier |
 | G20 | IaC/K8s policy | READY NARROW + REMOTE | JSON fixtures + real K8s Deployment security check green in PR, no OPA/Trivy yet |
-| G21 | Image CVE scan | CONFIG, REMOTE PENDING | Trivy manual/scheduled workflow scans immutable GHCR digest, blocking HIGH/CRITICAL threshold, JSON artifact |
+| G21 | Image CVE scan | READY + REAL RED | [Trivy exit 1](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840) on immutable GHCR digest due HIGH/CRITICAL findings, real JSON evidence uploaded; needs CVE remediation to be green |
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
 | G23 | Attestation/provenance | READY REAL + REMOTE | trusted release GitHub Sigstore provenance and independent gh attestation verify both passed in [release 43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
 | G24 | Immutable promotion | READY KIND + REMOTE | verified real GHCR digest identical in Docker and kind deployment; no production |
