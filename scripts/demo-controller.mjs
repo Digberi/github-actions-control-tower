@@ -17,6 +17,9 @@ const cases = {
   G05: { title: "Unit pricing invariant", command: "test:unit", failure: "unit" },
   G08: { title: "HTTP integration invariant", command: "test:integration", failure: "integration" },
   G10: { title: "Backward-compatible API response", command: "check:contract", failure: "contract" },
+  G11: { title: "Independent HTTP consumer contract", command: "test:consumer", failure: "consumer" },
+  G13: { title: "Expand-only migration safety", heavy: true },
+  G14: { title: "Domain to transport import forbidden", command: "check:architecture", failure: "boundary" },
   G15: { title: "Source import cycle", command: "check:architecture", failure: "architecture" },
   G16: { title: "Secret pattern in synthetic fixture", command: "check:secrets", failure: "security" },
   G19: { title: "License allowlist policy", heavy: true },
@@ -28,7 +31,11 @@ const cases = {
 };
 
 const liveEvidence = {
-  G10: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611"
+  G10: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611",
+  G27: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037"
+  }
 };
 
 function printHelp() {
@@ -38,6 +45,7 @@ function printHelp() {
     "  npm run demo:list",
     "  npm run demo:case -- --id G10 --mode red --target local",
     "  npm run demo:case -- --id G10 --mode green --target local",
+    "  npm run demo:case -- --id G27 --mode red --target prepared",
     "  npm run demo:show -- --id G27",
     "  npm run demo:report",
     "  npm run demo:cleanup -- --scope SESSION_ID --dry-run",
@@ -59,7 +67,7 @@ function preflight() {
     memoryGiB: Number((os.totalmem() / 1024 ** 3).toFixed(1)),
     docker: { available: docker.status === 0 },
     githubCliAuthenticated: gh.status === 0,
-    localDemoChecks: ["G05", "G08", "G10", "G15", "G16", "G19", "G20", "G24", "G25", "G26", "G27"]
+    localDemoChecks: Object.keys(cases)
   };
   process.stdout.write(JSON.stringify(statuses, null, 2) + "\n");
   if (!statuses.node.ready) process.exitCode = 1;
@@ -74,8 +82,23 @@ function runCase() {
   if (!test || !["green", "red"].includes(mode)) {
     throw new Error("Unknown ID/mode. Use demo:list.");
   }
-  if (!["local", "github"].includes(target)) {
-    throw new Error("Supported targets: local, github; prepared evidence via demo:show");
+  if (!["local", "github", "prepared"].includes(target)) {
+    throw new Error("Supported targets: local, github, prepared");
+  }
+  if (target === "prepared") {
+    const source = liveEvidence[id];
+    const url = typeof source === "string"
+      ? (mode === "red" ? source : null)
+      : source?.[mode];
+    if (!url) {
+      throw new Error("No verified pre-recorded remote run for " + id + " " + mode);
+    }
+    process.stdout.write(JSON.stringify({
+      source: "PREPARED_VERIFIED_GITHUB_RUN", gate: id, mode,
+      workflowRunUrl: url,
+      note: "Read-only link to an earlier real job; no new gate was executed."
+    }, null, 2) + "\n");
+    return;
   }
   if (target === "github" && process.env.GITHUB_ACTIONS !== "true") {
     throw new Error("GitHub target requires a real GitHub Actions runner");

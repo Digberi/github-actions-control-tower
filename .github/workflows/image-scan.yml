@@ -1,0 +1,52 @@
+name: "09 · Trivy Image Vulnerability Scan"
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        type: string
+        description: "Immutable GHCR image to scan; leave default for known-good lecture artifact"
+        required: true
+        default: "ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f"
+  schedule:
+    - cron: "43 3 * * 2"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  trivy:
+    name: "G21 · CVE HIGH/CRITICAL block on existing image"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Authenticate with short-lived GitHub token
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Verify target is an immutable GHCR digest
+        env:
+          IMAGE: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f' }}
+        run: |
+          node scripts/k8s-render.mjs "$IMAGE" > /dev/null
+          mkdir -p reports
+          echo "Scanning image: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f' }}
+          format: json
+          output: reports/trivy.json
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: trivy-image-cve-report
+          path: reports/trivy.json
+          if-no-files-found: warn
+          retention-days: 7

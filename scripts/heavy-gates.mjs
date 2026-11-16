@@ -42,6 +42,19 @@ function licenseGate() {
   requireInvariant(denied.length === 0, "License policy rejected one or more components");
 }
 
+function migrationGate() {
+  const file = mode === "red"
+    ? "fixtures/migrations/breaking.sql"
+    : "migrations/001_orders.sql";
+  const sql = readFileSync(resolve(root, file), "utf8");
+  const withoutComments = sql.replace(/--[^\n]*/g, "").toUpperCase();
+  const destructive = /\bDROP\s+(?:TABLE|COLUMN|INDEX)\b|\bTRUNCATE\b|\bALTER\s+TABLE[\s\S]*?\bSET\s+NOT\s+NULL\b/;
+  requireInvariant(!destructive.test(withoutComments), "G13 destructive migration rejected by expand-only policy");
+  requireInvariant(withoutComments.includes("CREATE TABLE IF NOT EXISTS") ||
+    withoutComments.includes("ADD COLUMN"), "G13 migration must be additive");
+  process.stdout.write(JSON.stringify({ gate, source: file, mode }) + "\n");
+}
+
 function k8sGate() {
   const manifest = process.env.CHECK_REAL_K8S_MANIFEST === "true" && mode === "green"
     ? load("infra/k8s/deployment.json")
@@ -110,6 +123,7 @@ function oidcGate() {
 }
 
 const gates = {
+  G13: migrationGate,
   G19: licenseGate,
   G20: k8sGate,
   G24: digestGate,
