@@ -64,7 +64,7 @@ jobs:
           kubectl port-forward service/control-tower 18080:3000 > /tmp/control-tower-port-forward.log 2>&1 &
           proxy=$!
           trap 'kill "$proxy" || true; kubectl describe pod -l app=control-tower || true' EXIT
-          for attempt in $(seq 1 45); do
+          for _ in $(seq 1 45); do
             if curl --fail --silent http://127.0.0.1:18080/health/ready; then
               echo "G29: real pod readiness and service HTTP smoke PASSED" >> "$GITHUB_STEP_SUMMARY"
               exit 0
@@ -85,7 +85,7 @@ jobs:
           trap 'kill "$proxy" || true; kubectl describe deployment control-tower || true' EXIT
           sleep 4
           errors=0
-          for attempt in $(seq 1 25); do
+          for _ in $(seq 1 25); do
             curl --max-time 3 --fail --silent http://127.0.0.1:18080/health/ready > /dev/null || errors=$((errors + 1))
             sleep 1
           done

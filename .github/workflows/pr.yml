@@ -199,7 +199,7 @@ jobs:
         run: |
           docker run -d --name ci-demo -p 127.0.0.1:3000:3000 ci-demo:pr
           trap 'docker logs ci-demo || true; docker stop ci-demo || true' EXIT
-          for attempt in $(seq 1 20); do
+          for _ in $(seq 1 20); do
             if curl --fail --silent http://127.0.0.1:3000/health; then
               exit 0
             fi

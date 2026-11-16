@@ -77,7 +77,7 @@ jobs:
           docker pull "$IMAGE"
           docker run -d --name staging-demo -p 127.0.0.1:3000:3000 "$IMAGE"
           trap 'docker logs staging-demo || true; docker stop staging-demo || true' EXIT
-          for attempt in $(seq 1 20); do
+          for _ in $(seq 1 20); do
             if curl --fail --silent http://127.0.0.1:3000/health; then
               echo "## Staging simulation" >> "$GITHUB_STEP_SUMMARY"
               echo "$IMAGE" >> "$GITHUB_STEP_SUMMARY"
