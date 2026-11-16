@@ -1,0 +1,53 @@
+name: "10 · Real OpenAPI Compatibility"
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        description: "green: compatible spec, red: removed required response property"
+        required: true
+        default: green
+        options: [green, red]
+
+permissions:
+  contents: read
+
+jobs:
+  oasdiff:
+    name: "G10 · oasdiff backward compatibility"
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      MODE: ${{ inputs.mode || 'green' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare actual OpenAPI baseline to candidate
+        run: |
+          if [ "$MODE" = red ]; then
+            candidate=breaking.json
+          else
+            candidate=current.json
+          fi
+          mkdir -p reports
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD/openapi:/specs:ro" tufin/oasdiff:v1.37.0 \
+            breaking --format markdown /specs/baseline.json "/specs/$candidate" \
+            > reports/oasdiff.md
+      - name: Save compatibility evidence
+        if: always()
+        run: |
+          echo "G10 oasdiff scenario: $MODE" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f reports/oasdiff.md ]; then
+            head -c 8000 reports/oasdiff.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: oasdiff-${{ inputs.mode || 'green' }}
+          path: reports/oasdiff.md
+          if-no-files-found: warn
+          retention-days: 7

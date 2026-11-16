@@ -1,0 +1,24 @@
+name: "11 · YAML and Dockerfile Linters"
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: "G02 · yamllint + Hadolint (ShellCheck via actionlint)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Real YAML indentation/syntax lint
+        run: |
+          python3 -m venv "$RUNNER_TEMP/yamllint-venv"
+          "$RUNNER_TEMP/yamllint-venv/bin/pip" install --disable-pip-version-check yamllint==1.38.0
+          "$RUNNER_TEMP/yamllint-venv/bin/yamllint" -c .yamllint.yaml .github/workflows
+      - name: Real Dockerfile best-practice lint
+        run: docker run --rm -i hadolint/hadolint:v2.15.0 < Dockerfile

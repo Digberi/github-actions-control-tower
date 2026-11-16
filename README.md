@@ -53,7 +53,7 @@ curl -X POST http://localhost:3000/orders \
 та idempotency key. Без БД застосунок працює in-memory; у PR окрема job
 з PostgreSQL service container перевіряє concurrent retries і rollback.
 
-## Керований сценарій лектора (11 парних гейтів, 22 варіанти)
+## Керований сценарій лектора (14 парних гейтів, 28 варіантів)
 
 ~~~bash
 npm run demo:preflight
@@ -62,6 +62,7 @@ npm run demo:case -- --id G27 --mode red --target local --session lecture
 npm run demo:case -- --id G27 --mode green --target local --session lecture
 npm run demo:report
 npm run demo:show -- --id G10
+npm run demo:case -- --id G27 --mode red --target prepared
 npm run demo:cleanup -- --scope lecture --dry-run
 ~~~
 
@@ -85,7 +86,8 @@ npm run demo:performance    # artificially slow response and p95 failure
 ~~~
 
 Старі короткі команди вище залишені для швидкого показу шести сценаріїв;
-новий контролер охоплює ще license, K8s, digest, cost та OIDC.
+новий контролер охоплює consumer contract, migration safety,
+architecture boundaries, license, K8s, digest, cost та OIDC.
 
 ## GitHub Actions
 
@@ -103,12 +105,16 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 | Workflow | Trigger | Результат |
 |---|---|---|
 | `01 · PR Quality Gates` | PR, manual | actionlint, PostgreSQL, coverage, policy matrix, CycloneDX, audit, static/unit/E2E/perf/Docker та required job |
-| `02 · Trusted Build and Publish` | push main, manual | GHCR digest → Docker smoke → kind K8s rollout/smoke/broken rollout/rollback |
+| `02 · Trusted Build and Publish` | push main, manual | GHCR digest + Sigstore attestation/verification → Docker smoke → kind K8s rollout/rollback |
 | `03 · Controlled Red / Green` | manual із scenario або gate+mode | real RED job, session-scoped JSON artifact |
 | `04 · Interactive HTML Demo` | docs change on main, manual | GitHub Pages із `docs/` |
 | `05 · Scheduled Deep Checks` | Mondays, manual | npm audit, coverage report (поки без threshold), performance smoke |
 | `Reusable · Ephemeral kind Deployment` | workflow_call | 2 pod replicas, digest, live probes, availability, undo |
 | `06 · Manual Rollback Drill` | manual | відтворюваний kind rollback без rebuild |
+| `07 · Real k6 Performance Gate` | PR, manual green/red | справжній k6 p95/failed rate thresholds + JSON report |
+| `08 · CodeQL Static Analysis` | PR, main, manual | GitHub SAST security-extended query pack |
+| `09 · Trivy Image Vulnerability Scan` | scheduled/manual | справжній CVE scan image@sha256, HIGH/CRITICAL exit 1 + JSON evidence |
+| `10 · Real OpenAPI Compatibility` | PR, manual green/red | oasdiff перевіряє spec на breaking changes |
 
 Після першого push:
 
@@ -133,7 +139,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 - Сканер `check:secrets` — прості патерни, не заміна Gitleaks.
 - `check:contract` перевіряє backward compatibility невеликого JSON-контракту,
   не OAS/OpenAPI semantics чи Pact.
-- `check:performance` — локальний HTTP smoke, не load/soak і не k6.
+- `check:performance` — швидкий локальний HTTP smoke; окремий workflow виконує справжній k6.
 - `test:integration` використовує HTTP/in-memory; окремий `test:postgres` перевіряє реальну БД.
 - `staging-kind` розгортає **тимчасовий kind на runner**, не постійний cloud staging.
 - G30/G31 — actual bad rollout + undo у kind, не production rollback.

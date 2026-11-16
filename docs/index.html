@@ -65,6 +65,9 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938">kind + rollback: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175">G27: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037">G27: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157">k6: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867239">CodeQL: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325">Sigstore provenance</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
       </nav>
     </header>
@@ -142,6 +145,9 @@
         <option value="G05">G05 · unit pricing RED</option>
         <option value="G08">G08 · HTTP integration RED</option>
         <option value="G10">G10 · API contract RED</option>
+        <option value="G11">G11 · independent consumer RED</option>
+        <option value="G13">G13 · destructive migration RED</option>
+        <option value="G14">G14 · architecture boundary RED</option>
         <option value="G15">G15 · architecture cycle RED</option>
         <option value="G16">G16 · secret pattern RED</option>
         <option value="G19">G19 · license allowlist RED</option>
@@ -233,7 +239,10 @@
     Object.assign(scenarios,{
       G05:{fail:"code",text:"G05 unit RED: ціновий інваріант не виконується, required блокує merge."},
       G08:{fail:"tests",text:"G08 integration RED: HTTP створення order повернуло неправильний status."},
-      G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний зафіксований RED run у GitHub."},
+      G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний RED run і додано oasdiff для OpenAPI schema."},
+      G11:{fail:"tests",text:"G11 independent consumer RED: зламано очікування клієнта, хоча unit producer green."},
+      G13:{fail:"tests",text:"G13 migration RED: DROP COLUMN не проходить expand-only policy, стару версію треба зберегти."},
+      G14:{fail:"tests",text:"G14 architecture boundary RED: domain залежить від HTTP transport; перевірка зупиняє PR."},
       G15:{fail:"tests",text:"G15 architecture RED: у граф import додано цикл, gate завершується exit 1."},
       G16:{fail:"security",text:"G16 synthetic canary відповідає secret pattern. Ніякого справжнього секрету в репозиторії немає."},
       G19:{fail:"security",text:"G19 fixture має license поза allowlist. Це НЕ повний SBOM license scan."},
@@ -290,9 +299,9 @@
 
     </section>
     <section class="implementation" aria-label="Рівні реалізації">
-      <article><h3>11 пар RED/GREEN</h3><p>Контролер має 22 перевірені локальні варіанти. В GitHub кожен RED — справжній failed step + JSON evidence.</p></article>
-      <article><h3>Паралельні GitHub Jobs</h3><p>Node 22/24, PostgreSQL, actionlint, coverage, npm audit + CycloneDX, container, policy matrix та aggregated Required.</p></article>
-      <article><h3>Deep/Release</h3><p>Тимчасовий kind rollback і promotion до digest. Pact, CodeQL, Trivy, provenance, реальний Pulumi/OIDC/AWS — окремі етапи; 32/32 не заявлено.</p></article>
+      <article><h3>14 пар RED/GREEN</h3><p>Контролер має 28 перевірених локальних варіантів, посилання на підготовлені фактичні GitHub RED/GREEN jobs і JSON evidence.</p></article>
+      <article><h3>Паралельні GitHub Jobs</h3><p>Node 22/24, PostgreSQL, consumer, actionlint, coverage, CycloneDX/audit, CodeQL, k6, Docker і Required.</p></article>
+      <article><h3>Deep/Release</h3><p>GHCR, Sigstore attestation + verification, kind rollback. Pact, real AWS OIDC, approval і cloud production ще не виконувались; 32/32 не заявлено.</p></article>
     </section>
     <footer class="foot">Demo mode не змінює production і не використовує cloud secrets. Симуляція відображає лише логіку проходження гейтів.</footer>
   </main>

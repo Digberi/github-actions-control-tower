@@ -1,0 +1,54 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Control Tower Orders", "version": "1.0.0" },
+  "paths": {
+    "/orders": {
+      "post": {
+        "operationId": "createOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["items"],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["quantity", "priceCents"],
+                      "properties": {
+                        "quantity": { "type": "integer", "minimum": 1 },
+                        "priceCents": { "type": "integer", "minimum": 0 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["orderId", "status", "totalCents"],
+                  "properties": {
+                    "orderId": { "type": "string", "format": "uuid" },
+                    "status": { "type": "string" },
+                    "totalCents": { "type": "integer", "minimum": 0 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
