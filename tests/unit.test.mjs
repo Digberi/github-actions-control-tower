@@ -11,6 +11,10 @@ test("rejects missing and invalid items", () => {
   assert.throws(() => calculateTotal([{ quantity: -1, priceCents: 300 }]), TypeError);
 });
 
+test("rejects unsafe integer totals rather than silently losing cents", () => {
+  assert.throws(() => calculateTotal([{ quantity: 2, priceCents: Number.MAX_SAFE_INTEGER }]), TypeError);
+});
+
 test("store keeps created orders", () => {
   const store = makeOrderStore();
   const order = store.create([{ quantity: 1, priceCents: 299 }]);
