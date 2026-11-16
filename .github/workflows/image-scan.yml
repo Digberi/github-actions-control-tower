@@ -35,7 +35,7 @@ jobs:
           node scripts/k8s-render.mjs "$IMAGE" > /dev/null
           mkdir -p reports
           echo "Scanning image: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
-      - uses: aquasecurity/trivy-action@v0.36.0
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f' }}
           format: json

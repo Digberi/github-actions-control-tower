@@ -1,7 +1,7 @@
 # G01–G32 — reality check
 
 This matrix distinguishes **local implementation** from **verified remote execution**.
-Multiple implementation pull requests have been merged on 2026-11-16 (through PR #8). Real runner
+Multiple implementation pull requests have been merged on 2026-11-16 (through PR #10), with PR #11 proving G16/G19 RED/GREEN. Real runner
 evidence includes [PR #8](https://github.com/Digberi/github-actions-control-tower/pull/8),
 [Sigstore + kind release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325),
 [real linter](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391)
@@ -29,10 +29,10 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G13 | DB migration safety | READY NARROW + REMOTE | actual applied 001_orders.sql with additive-only validator vs red drop-column fixture |
 | G14 | Architecture boundaries | READY NARROW + REMOTE | domain-to-transport import forbidden, real source graph + red fixture |
 | G15 | Dependency cycles | LOCAL | source import graph DFS + red fixture |
-| G16 | Gitleaks/secret scanning | PARTIAL | basic patterns + generated synthetic red case |
+| G16 | Gitleaks/secret scanning | READY REAL + REMOTE RED/GREEN | [Gitleaks v8.30.1 real RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) detected 1 ephemeral fake PAT, exit 1 + redacted report; [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276) scanned real checked-out files. Earlier pattern demo preserved; repository history scanning not yet wired. |
 | G17 | SAST | READY CODEQL + REMOTE | [CodeQL security-extended JS workflow success](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867239) |
 | G18 | SCA | READY NPM + REMOTE | real npm audit high+ found no vulnerabilities; PR gate green; full Trivy SCA remains |
-| G19 | License policy | LOCAL FIXTURE | explicit allowlist on synthetic component licenses; no actual dependency classifier |
+| G19 | License policy | READY REAL NPM + REMOTE RED/GREEN | Real `npm ci` and transitive installed `package.json` license inventory (14 actual); [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) ephemeral GPL policy input rejected, exit 1 + JSON; [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276) installed-dependency allowlist passes. Strict SPDX tokens; no license text verification. |
 | G20 | IaC/K8s policy | READY NARROW + REMOTE | JSON fixtures + real K8s Deployment security check green in PR, no OPA/Trivy yet |
 | G21 | Image CVE scan | READY + REAL RED | [Trivy exit 1](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840) on immutable GHCR digest due HIGH/CRITICAL findings, real JSON evidence uploaded; needs CVE remediation to be green |
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
@@ -45,7 +45,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G29 | Post-deploy smoke | READY KIND + REMOTE | kind real 2-pod deployment/readiness/Service HTTP smoke green |
 | G30 | Rolling/canary availability | READY KIND + REMOTE | kind maxUnavailable=0 + 25 HTTP checks during bad digest rollout, green |
 | G31 | Rollback | READY KIND + REMOTE | real failed rollout → kubectl rollout undo → original digest + smoke, green with artifact; no production |
-| G32 | Aggregate required checks | PARTIAL | aggregate job exists; branch ruleset not configured |
+| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates all core checks and [real G16/G19 reusable security checks](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966017285); GitHub branch ruleset not configured. |
 
 The diagram in [docs/index.html](docs/index.html) intentionally shows the
 complete **target** from the implementation brief. A green visualization

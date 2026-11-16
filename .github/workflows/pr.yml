@@ -220,10 +220,19 @@ jobs:
           done
           exit 1
 
+  security:
+    name: "G16/G19 · Real Security (reusable)"
+    permissions:
+      contents: read
+    uses: ./.github/workflows/security-real.yml
+    with:
+      gate: all
+      mode: green
+
   required:
     name: "Required · PR Gate"
     if: always()
-    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image]
+    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security]
     runs-on: ubuntu-latest
     steps:
       - name: Collect outcomes and enforce required checks
@@ -240,11 +249,12 @@ jobs:
           E2E: ${{ needs.e2e.result }}
           PERFORMANCE: ${{ needs.performance.result }}
           IMAGE: ${{ needs.image.result }}
+          SECURITY: ${{ needs.security.result }}
         run: |
           echo "## PR Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           printf '| Job | Result |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
           failed=0
-          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE; do
+          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY; do
             result="${!job}"
             printf '| %s | %s |\n' "$job" "$result" >> "$GITHUB_STEP_SUMMARY"
             if [ "$result" != success ]; then

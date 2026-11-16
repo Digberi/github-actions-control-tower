@@ -37,7 +37,7 @@ jobs:
           node scripts/k8s-render.mjs "$IMAGE" > /dev/null
           echo "Image reference: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
       - name: Create ephemeral Kubernetes
-        uses: helm/kind-action@v1.14.0
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
         with:
           cluster_name: control-tower
       - name: Pull image using scoped GitHub token

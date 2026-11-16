@@ -7,6 +7,9 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| G16: verified Gitleaks v8.30.1, temporary fake PAT detected, exit 1 + redacted JSON | 🔴 EXPECTED RED | [43965551427](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) |
+| G19: actual installed npm license inventory (14 packages + one temporary GPL input), exit 1 + JSON | 🔴 EXPECTED RED | [43965551427](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) |
+| G16/G19: actual Gitleaks repo scan + installed npm dependency licenses | ✅ GREEN BOTH | [43965642276](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276) |
 | PR #1: actionlint, PostgreSQL, тестова матриця, coverage, SBOM/audit, Docker, required job | ✅ GREEN | [43894228150](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894228150) |
 | PR #2: незалежний consumer, міграція, boundaries, required checks | ✅ GREEN | [43896867056](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867056) |
 | PR #3: новий OpenAPI, Hadolint, yamllint, required suite | ✅ GREEN | [43898394030](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394030) |
