@@ -45,7 +45,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G29 | Post-deploy smoke | READY KIND + REMOTE | kind real 2-pod deployment/readiness/Service HTTP smoke green |
 | G30 | Rolling/canary availability | READY KIND + REMOTE | kind maxUnavailable=0 + 25 HTTP checks during bad digest rollout, green |
 | G31 | Rollback | READY KIND + REMOTE | real failed rollout → kubectl rollout undo → original digest + smoke, green with artifact; no production |
-| G32 | Aggregate required checks | PARTIAL | aggregate job exists; branch ruleset not configured |
+| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates all core checks and [real G16/G19 reusable security checks](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966017285); GitHub branch ruleset not configured. |
 
 The diagram in [docs/index.html](docs/index.html) intentionally shows the
 complete **target** from the implementation brief. A green visualization
