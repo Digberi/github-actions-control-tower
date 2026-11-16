@@ -7,6 +7,7 @@
 реалізація всіх 32 гейтів. Повний план реалізації, критерії приймання й
 14 advanced demo-сценаріїв — у [IMPLEMENTATION_BRIEF.md](IMPLEMENTATION_BRIEF.md).
 Поточний стан по кожному G01–G32 — [CHECKS_MATRIX.md](CHECKS_MATRIX.md).
+Фактичні GitHub прогони — [VERIFICATION.md](VERIFICATION.md).
 
 ## Інтерактивна візуалізація
 
@@ -57,6 +58,17 @@ npm run demo:performance    # artificially slow response and p95 failure
 по-справжньому червоною.
 
 ## GitHub Actions
+
+Вже збережені приклади для лекції:
+
+- [GREEN — повний happy check](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097).
+- [RED — зламаний контракт, відсутній `orderId`](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611).
+- [GREEN — GHCR release + smoke того самого digest](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385092).
+
+GitHub Pages поки **не ввімкнені у Settings → Pages**. [Перший
+workflow](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204)
+відпрацював і показав саме відсутність Pages site; після ввімкнення
+Actions як джерела потрібно повторно запустити `04 · Interactive HTML Demo`.
 
 | Workflow | Trigger | Результат |
 |---|---|---|
