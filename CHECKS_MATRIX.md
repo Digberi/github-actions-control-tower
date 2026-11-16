@@ -14,7 +14,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | ID | Target gate | First-cut status | Actual implementation / gap |
 |---|---|---|---|
 | G01 | actionlint | READY + REMOTE | official actionlint container, failed first PR then corrected, green rerun |
-| G02 | yamllint/ShellCheck/Hadolint | PLANNED | not installed |
+| G02 | yamllint/ShellCheck/Hadolint | IMPLEMENTED, REMOTE PENDING | yamllint and Hadolint workflow; ShellCheck is embedded inside actionlint Docker |
 | G03 | ESLint/Prettier | PARTIAL | JS syntax + whitespace hygiene |
 | G04 | TypeScript typecheck | PLANNED | demo API currently plain JS |
 | G05 | Unit tests | LOCAL + REMOTE | node:test on pricing/storage; happy release verified |
@@ -22,22 +22,22 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G07 | Node/platform matrix | PARTIAL | Node 22 and 24 PR unit matrix; no OS matrix |
 | G08 | Postgres integration | READY + REMOTE | PostgreSQL 16 service + concurrent transactional idempotency test green; skipped locally without DB |
 | G09 | API E2E | LOCAL | real HTTP order lifecycle |
-| G10 | API backward compatibility | PARTIAL + REMOTE | JSON response contract; verified failed `orderId` fixture; no oasdiff |
-| G11 | Pact consumer contract | LOCAL CONSUMER, REMOTE PENDING | independent HTTP consumer uses old response contract; deliberately missing orderId gives red; not Pact yet |
+| G10 | API backward compatibility | JSON REMOTE + OASDIFF PENDING | existing JSON response gate with verified red; new OpenAPI 3.0 + oasdiff separate workflow |
+| G11 | Pact consumer contract | READY CONSUMER + REMOTE | independent HTTP consumer old response contract, verified GH PR job; not Pact yet |
 | G12 | Event/schema compatibility | OPTIONAL | no event bus in demo |
-| G13 | DB migration safety | LOCAL, REMOTE PENDING | actual applied 001_orders.sql with additive-only validator vs red drop-column fixture; static policy is narrow |
-| G14 | Architecture boundaries | LOCAL, REMOTE PENDING | domain-to-transport import forbidden, real source graph + red fixture |
+| G13 | DB migration safety | READY NARROW + REMOTE | actual applied 001_orders.sql with additive-only validator vs red drop-column fixture |
+| G14 | Architecture boundaries | READY NARROW + REMOTE | domain-to-transport import forbidden, real source graph + red fixture |
 | G15 | Dependency cycles | LOCAL | source import graph DFS + red fixture |
 | G16 | Gitleaks/secret scanning | PARTIAL | basic patterns + generated synthetic red case |
-| G17 | SAST | IMPLEMENTED, REMOTE PENDING | separate CodeQL security-extended JS workflow, uploaded GitHub code-scanning alerts |
+| G17 | SAST | READY CODEQL + REMOTE | [CodeQL security-extended JS workflow success](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867239) |
 | G18 | SCA | READY NPM + REMOTE | real npm audit high+ found no vulnerabilities; PR gate green; full Trivy SCA remains |
 | G19 | License policy | LOCAL FIXTURE | explicit allowlist on synthetic component licenses; no actual dependency classifier |
 | G20 | IaC/K8s policy | READY NARROW + REMOTE | JSON fixtures + real K8s Deployment security check green in PR, no OPA/Trivy yet |
 | G21 | Image CVE scan | CONFIG, REMOTE PENDING | Trivy manual/scheduled workflow scans immutable GHCR digest, blocking HIGH/CRITICAL threshold, JSON artifact |
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
-| G23 | Attestation/provenance | IMPLEMENTED, REMOTE PENDING | trusted release GitHub Sigstore provenance, pushes registry attestation, gh attestation verify |
+| G23 | Attestation/provenance | READY REAL + REMOTE | trusted release GitHub Sigstore provenance and independent gh attestation verify both passed in [release 43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
 | G24 | Immutable promotion | READY KIND + REMOTE | verified real GHCR digest identical in Docker and kind deployment; no production |
-| G25 | Performance smoke | LOCAL + REAL K6 REMOTE PENDING | local HTTP p95 and independent real k6 workflow (PR/dispatch, thresholds, summary artifact) |
+| G25 | Performance smoke | READY K6 + REMOTE | [k6 PR run 43896867157](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157) passed real p95 + error rate thresholds with report |
 | G26 | Cost budget preview | LOCAL FIXTURE | explicitly labeled synthetic Pulumi JSON and budget policy, no live cloud |
 | G27 | OIDC claims and STS | READY SYNTHETIC + REMOTE | signed local RSA JWT + reject tests; real [red](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) and [green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) workflow, no real STS |
 | G28 | Production approval | CONFIG | no production deploy; requires environment setup |
