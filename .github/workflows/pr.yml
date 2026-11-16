@@ -198,6 +198,15 @@ jobs:
           node-version: 22
       - run: npm ci --ignore-scripts
       - run: npm run check:performance
+      - name: Short real HTTP soak precursor to scheduled extended checks
+        run: node scripts/soak.mjs 3
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quick-http-soak
+          path: reports/http-soak.json
+          if-no-files-found: warn
+          retention-days: 14
 
   image:
     name: "Container · Build and smoke"

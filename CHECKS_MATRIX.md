@@ -18,7 +18,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G02 | yamllint/ShellCheck/Hadolint | READY + REMOTE | [yamllint and Hadolint green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391), actual two prior lint failures; ShellCheck embedded in actionlint |
 | G03 | ESLint/Prettier | READY NARROW + REMOTE RED/GREEN | real ESLint 9 and Prettier 3 on source + isolated style fixture; [RED exit 1 + artifact](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276) (`eqeqeq`, `semi`, formatting) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179); not full-repo lint |
 | G04 | TypeScript typecheck | READY DTO + REMOTE RED/GREEN | actual `tsc --noEmit` strict on typed order DTO, [RED TS2322 + artifact](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179); API remains ESM JavaScript |
-| G05 | Unit tests | LOCAL + REMOTE | node:test on pricing/storage; happy release verified |
+| G05 | Unit tests + seeded property fuzz | READY + REMOTE RED/GREEN | Existing node:test pricing/storage plus 3,000-seed deterministic integer-cent property test. [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291) caught an actual unsafe-integer total and blocked required PR gate; [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021) after safe-integer overflow guard. TAP artifacts on failure and success. |
 | G06 | Coverage threshold | READY + REMOTE | node:test lines ≥80%, locally measured 82.61%, green PR job |
 | G07 | Node/platform matrix | READY REAL MATRIX + REMOTE RED/GREEN | real [GREEN four runners](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799): Ubuntu Node 22/24, macOS Node 22, Windows Node 22. [RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867): Windows fails on POSIX-only separator, other 3 pass; every job uploads evidence |
 | G08 | Postgres integration | READY + REMOTE | PostgreSQL 16 service + concurrent transactional idempotency test green; skipped locally without DB |
@@ -45,7 +45,7 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G29 | Post-deploy smoke | READY KIND + REMOTE | kind real 2-pod deployment/readiness/Service HTTP smoke green |
 | G30 | Rolling/canary availability | READY KIND + REMOTE | kind maxUnavailable=0 + 25 HTTP checks during bad digest rollout, green |
 | G31 | Rollback | READY KIND + REMOTE | real failed rollout → kubectl rollout undo → original digest + smoke, green with artifact; no production |
-| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates core checks and G16/G19/G20 real security reusable jobs (new G20 aggregate proof pending this PR); GitHub branch ruleset not configured. |
+| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates core checks and G16/G19/G20 real security reusable jobs ([G20 aggregate proven](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967038492)); GitHub branch ruleset not configured. |
 
 The diagram in [docs/index.html](docs/index.html) intentionally shows the
 complete **target** from the implementation brief. A green visualization
