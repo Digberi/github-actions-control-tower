@@ -14,7 +14,7 @@ on:
         type: choice
         required: true
         default: none
-        options: [none, G05, G08, G10, G11, G13, G14, G15, G16, G19, G20, G24, G25, G26, G27]
+        options: [none, G05, G08, G09, G10, G11, G13, G14, G15, G16, G19, G20, G24, G25, G26, G27]
       mode:
         description: "Green is a passing gate; red is a real job failure"
         type: choice

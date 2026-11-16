@@ -15,6 +15,22 @@
 4. Запам'ятай послідовність: **GREEN PR → RED contract → RED security →
    GREEN release + attestation → kind rollback → висновок**.
 
+### Додатковий 3-хвилинний блок: реальний cross-platform RED
+
+Якщо студенти запитують, навіщо потрібна matrix, відкрий
+[G07 GREEN — 4/4](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799),
+а потім [G07 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867).
+Три jobs Ubuntu/macOS успішні, і **тільки реальний Windows runner** падає
+через POSIX-only path separator. `fail-fast: false` дає іншим jobs завершитися;
+артефакти завантажені навіть після failure. Локальна емуляція Windows
+у CLI позначена окремо й не є заміною цього run.
+
+Для style/type gate відкрий [G03/G04 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179),
+потім [G03 RED (ESLint/Prettier)](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276)
+і [G04 RED (TS2322)](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680).
+Це справжні tool exits `1`, а `upload-artifact` працює на `always()`.
+Важлива межа: G04 компілює вузьку TypeScript DTO fixture; backend лишається JS.
+
 ## Основний сценарій (12–18 хв)
 
 | Час | Що демонструю | Що говорю | Де дивлюся |
@@ -36,6 +52,8 @@
 - `G27 / red` — синтетичний неправильний JWT subject, **справжній GitHub failed job**,
   machine-readable evidence у artifacts. Поруч `G27 / green` — виправлена policy.
 - `contract / red` — потрібне поле `orderId` зникає, перевірка повертає exit 1.
+- `G09 / red` — API E2E перевіряє, що неіснуючий order має HTTP 404,
+  навмисна ін'єкція повертає 200 і руйнує assertion (після оновлення workflow).
 - У [10 · Real OpenAPI Compatibility](https://github.com/Digberi/github-actions-control-tower/actions/workflows/openapi-diff.yml)
   ручний input `mode=red` запускає реальний oasdiff і падає на breaking ERR;
   `mode=green` завершується успішно. Пара прямих посилань вище.
@@ -79,5 +97,6 @@ npm run demo:cleanup -- --scope lecture --dry-run
 - Kind — тимчасовий Kubernetes на GitHub runner, **не виробниче середовище**.
 - Без реальних бізнес-витрат Pulumi budget — synthetic fixture;
   license та K8s policy наразі вузькі навчальні перевірки.
-- Стенд підтримує 14 пар RED/GREEN локально, а не 32/32 повних
+- Стенд підтримує 18 зареєстрованих пар RED/GREEN (G03/G04 після
+  `quality:bootstrap`), а не 32/32 повних
   production-equivalent gates. [Матриця стану](CHECKS_MATRIX.md).

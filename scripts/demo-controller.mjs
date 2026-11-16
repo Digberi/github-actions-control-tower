@@ -35,9 +35,26 @@ const cases = {
 };
 
 const liveEvidence = {
-  G09: null,
-  G07: null,
-  G10: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611",
+  G03: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179"
+  },
+  G04: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179"
+  },
+  G07: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799"
+  },
+  G10: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220"
+  },
+  G25: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43900813599",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157"
+  },
   G27: {
     red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175",
     green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037"

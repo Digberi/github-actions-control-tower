@@ -71,11 +71,17 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939">oasdiff: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220">oasdiff: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy CVE: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179">ESLint + tsc: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276">G03 ESLint: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680">G04 TypeScript: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799">OS matrix: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867">Windows matrix: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43900813599">k6 p95: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/LECTURE_DEMO.md">Сценарій live demo</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
       </nav>
     </header>
-    <div class="notice" role="note"><strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong> Реальні GitHub Actions перевірили actionlint, Node 22/24, coverage, PostgreSQL, SCA/SBOM, CodeQL, k6, GHCR, oasdiff та політики. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938">Kind rollout + 25 HTTP samples + rollback успішні</a>; <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy реально заблокував HIGH/CRITICAL CVEs</a>. Cost/license/OIDC використовують чітко synthetic fixtures; статус G01–G32 дивись у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.</div>
+    <div class="notice" role="note"><strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong> Реальні GitHub Actions перевірили actionlint, Node 22/24 на Ubuntu/macOS/Windows, ESLint, Prettier, strict DTO TypeScript, coverage, PostgreSQL, SCA/SBOM, CodeQL, k6, GHCR, oasdiff та політики. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938">Kind rollout + 25 HTTP samples + rollback успішні</a>; <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy реально заблокував HIGH/CRITICAL CVEs</a>. TypeScript охоплює тільки DTO fixture; cost/license/OIDC мають чітко позначені synthetic fixtures; статус G01–G32 дивись у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.</div>
     <section class="panel" aria-label="Інтерактивний CI/CD pipeline">
 <div id="cicd-tower-v1" class="ct-root">
   <style>
@@ -146,8 +152,12 @@
         <option value="performance">Погіршилась продуктивність</option>
         <option value="approval">Відхилено prod approval</option>
         <option value="rollout">Впав post-deploy smoke</option>
+        <option value="G03">G03 · реальний ESLint/Prettier RED</option>
+        <option value="G04">G04 · TypeScript TS2322 RED</option>
         <option value="G05">G05 · unit pricing RED</option>
+        <option value="G07">G07 · Windows-only matrix RED</option>
         <option value="G08">G08 · HTTP integration RED</option>
+        <option value="G09">G09 · API E2E 404 RED</option>
         <option value="G10">G10 · API contract RED</option>
         <option value="G11">G11 · independent consumer RED</option>
         <option value="G13">G13 · destructive migration RED</option>
@@ -206,6 +216,7 @@
     <ul id="ct-info-list" class="ct-info-list" hidden></ul>
   </div>
   <div id="ct-result" class="ct-note" aria-live="polite">Симуляція: усі гейти пройдені, той самий digest просунуто у production.</div>
+  <p id="ct-evidence-wrap" class="ct-note" hidden>Фактичний GitHub evidence: <a id="ct-evidence" href="#">відкрити RED run і artifacts ↗</a>. <span id="ct-evidence-qualifier"></span></p>
   <div class="ct-note">
     Запустити справжню job:
     <a href="https://github.com/Digberi/github-actions-control-tower/actions/workflows/demo-scenarios.yml">
@@ -241,8 +252,12 @@
       rollout:{fail:"production",text:"CI і staging зелені, але post-deploy smoke впав → recovery повертає попередній digest."}
     };
     Object.assign(scenarios,{
+      G03:{fail:"code",text:"G03 RED: справжні ESLint eqeqeq/semi + Prettier --check повернули exit 1; GitHub зберіг JSON artifact."},
+      G04:{fail:"code",text:"G04 RED: справжній TypeScript tsc --noEmit зупинився на TS2322 (string замість number) у DTO fixture. Це не typecheck всього JS backend."},
       G05:{fail:"code",text:"G05 unit RED: ціновий інваріант не виконується, required блокує merge."},
+      G07:{fail:"code",text:"G07 RED: POSIX-only separator зламався ТІЛЬКИ на справжньому Windows runner. Ubuntu Node 22/24 і macOS 22 — GREEN; fail-fast=false."},
       G08:{fail:"tests",text:"G08 integration RED: HTTP створення order повернуло неправильний status."},
+      G09:{fail:"tests",text:"G09 E2E RED: API для відсутнього order повертає 200 замість 404, test assertion блокує merge; локальне RED/GREEN підтверджено."},
       G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний RED run і додано oasdiff для OpenAPI schema."},
       G11:{fail:"tests",text:"G11 independent consumer RED: зламано очікування клієнта, хоча unit producer green."},
       G13:{fail:"tests",text:"G13 migration RED: DROP COLUMN не проходить expand-only policy, стару версію треба зберегти."},
@@ -252,10 +267,14 @@
       G19:{fail:"security",text:"G19 fixture має license поза allowlist. Це НЕ повний SBOM license scan."},
       G20:{fail:"security",text:"G20 fixture має небезпечний Kubernetes securityContext; політика його відхиляє."},
       G24:{fail:"release",text:"G24 staging digest ≠ production digest. Promotion має зупинитися до deploy."},
-      G25:{fail:"performance",text:"G25 ін'єкція затримки перевищує p95 1200ms. Це локальний HTTP smoke, не k6."},
+      G25:{fail:"performance",text:"G25 RED: окремий справжній k6 run має p95 ≈1.6s проти threshold 800ms; локальний demo:case використовує інший, легший HTTP smoke."},
       G26:{fail:"performance",text:"G26 synthetic Pulumi preview Δcost перевищує навчальний бюджет."},
       G27:{fail:"staging",text:"G27 локально підписаний RSA JWT має чужий OIDC subject. Цей gate не припускає cloud STS."}
     });
+    const realRedEvidence={
+      G03:"43954058276", G04:"43954113680", G07:"43954175867",
+      G10:"43899543939", G25:"43900813599", G27:"43894863175"
+    };
     const ids=["pr","code","tests","security","performance","required","release","staging","approval","production","healthy","rollback"];
     let selected=null;
     function select(id){
@@ -294,6 +313,12 @@
         n.dataset.state=state;
       });
       root.querySelector("#ct-result").textContent="Симуляція: "+sc.text;
+      const evidenceId=realRedEvidence[key], wrapper=root.querySelector("#ct-evidence-wrap");
+      wrapper.hidden=!evidenceId;
+      if(evidenceId){
+        root.querySelector("#ct-evidence").href="https://github.com/Digberi/github-actions-control-tower/actions/runs/"+evidenceId;
+        root.querySelector("#ct-evidence-qualifier").textContent=key==="G27"?"Контрольований синтетичний JWT, не AWS STS.":"Це реальний job failure, не статус цієї візуалізації.";
+      }
     }
     root.querySelector("#ct-scenario").addEventListener("change",draw);
     draw();
@@ -303,8 +328,8 @@
 
     </section>
     <section class="implementation" aria-label="Рівні реалізації">
-      <article><h3>14 пар RED/GREEN</h3><p>Контролер має 28 перевірених локальних варіантів, посилання на підготовлені фактичні GitHub RED/GREEN jobs і JSON evidence.</p></article>
-      <article><h3>Паралельні GitHub Jobs</h3><p>Node 22/24, PostgreSQL, consumer, actionlint, coverage, CycloneDX/audit, CodeQL, k6, Docker і Required.</p></article>
+      <article><h3>18 пар RED/GREEN</h3><p>Контролер має 36 зареєстрованих варіантів; G03/G04 локально потребують quality:bootstrap. Реальні GitHub RED/GREEN job links і JSON artifacts.</p></article>
+      <article><h3>Паралельні GitHub Jobs</h3><p>Ubuntu/macOS/Windows × Node 22/24, реальні ESLint/Prettier/tsc, PostgreSQL, consumer, actionlint, coverage, CycloneDX/audit, CodeQL, k6, Docker і Required.</p></article>
       <article><h3>Deep/Release</h3><p>GHCR, Sigstore attestation + verification, kind rollback. Pact, real AWS OIDC, approval і cloud production ще не виконувались; 32/32 не заявлено.</p></article>
     </section>
     <footer class="foot">Demo mode не змінює production і не використовує cloud secrets. Симуляція відображає лише логіку проходження гейтів.</footer>
