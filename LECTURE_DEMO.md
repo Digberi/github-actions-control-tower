@@ -53,7 +53,9 @@
   machine-readable evidence у artifacts. Поруч `G27 / green` — виправлена policy.
 - `contract / red` — потрібне поле `orderId` зникає, перевірка повертає exit 1.
 - `G09 / red` — API E2E перевіряє, що неіснуючий order має HTTP 404,
-  навмисна ін'єкція повертає 200 і руйнує assertion (після оновлення workflow).
+  навмисна ін'єкція повертає 200 і руйнує assertion:
+  [справжній RED з evidence](https://github.com/Digberi/github-actions-control-tower/actions/runs/43955060328)
+  → [GREEN після виправлення](https://github.com/Digberi/github-actions-control-tower/actions/runs/43955108982).
 - У [10 · Real OpenAPI Compatibility](https://github.com/Digberi/github-actions-control-tower/actions/workflows/openapi-diff.yml)
   ручний input `mode=red` запускає реальний oasdiff і падає на breaking ERR;
   `mode=green` завершується успішно. Пара прямих посилань вище.
