@@ -1,0 +1,22 @@
+{
+  "paths": {
+    "/health": {
+      "get": {
+        "status": 200,
+        "response": {
+          "status": "string"
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "status": 201,
+        "response": {
+          "orderId": "string",
+          "status": "string",
+          "totalCents": "number"
+        }
+      }
+    }
+  }
+}

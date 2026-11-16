@@ -1,0 +1,9 @@
+.git
+.github
+docs
+tests
+scripts
+fixtures
+node_modules
+README.md
+AGENTS.md

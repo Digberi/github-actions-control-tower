@@ -1,0 +1,88 @@
+name: "02 · Trusted Build and Publish"
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "*.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: "Validate · Build once · Push GHCR"
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.digest.outputs.image }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - name: Validate before privileged publish
+        run: npm run check
+      - name: Authenticate with short-lived GitHub token
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Build once and push to GHCR
+        id: digest
+        run: |
+          repository=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+          image="ghcr.io/$repository"
+          tag="sha-$GITHUB_SHA"
+          docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --tag "$image:$tag" .
+          docker push "$image:$tag"
+          immutable=$(docker image inspect "$image:$tag" --format '{{index .RepoDigests 0}}')
+          case "$immutable" in
+            *@sha256:*) ;;
+            *) echo "No registry digest available: $immutable"; exit 1 ;;
+          esac
+          echo "image=$immutable" >> "$GITHUB_OUTPUT"
+          echo "## Release image" >> "$GITHUB_STEP_SUMMARY"
+          echo "$immutable" >> "$GITHUB_STEP_SUMMARY"
+
+  staging-smoke:
+    name: "Staging simulation · Same immutable digest"
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Login to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Pull exact digest and smoke-test it locally
+        env:
+          IMAGE: ${{ needs.publish.outputs.image }}
+        run: |
+          case "$IMAGE" in
+            *@sha256:*) ;;
+            *) echo "Mutable tag forbidden"; exit 1 ;;
+          esac
+          docker pull "$IMAGE"
+          docker run -d --name staging-demo -p 127.0.0.1:3000:3000 "$IMAGE"
+          trap 'docker logs staging-demo || true; docker stop staging-demo || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:3000/health; then
+              echo "## Staging simulation" >> "$GITHUB_STEP_SUMMARY"
+              echo "$IMAGE" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1

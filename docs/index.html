@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Інтерактивна схема GitHub Actions Control Tower: quality gates, security, tests, deployment, rollback.">
+  <title>CI/CD Control Tower · Лекція 32</title>
+  <style>
+    :root {
+      color-scheme:dark;
+      --foreground:#eef2fa;
+      --muted-foreground:#b0bed0;
+      --muted:#162336;
+      --border:#33435b;
+      --ring:#60a5fa;
+      --primary:#60a5fa;
+      --green:#34d399;
+      --red:#fb7185;
+      --orange:#fbbf24;
+      --viz-series-1:#60a5fa;
+      --viz-series-2:#a78bfa;
+      --viz-series-3:#fb7185;
+      --viz-series-4:#fbbf24;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#0b1220; font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--foreground); }
+    a { color:#93c5fd; }
+    .page { max-width:1120px; margin:auto; padding:36px 22px 72px; }
+    .masthead { margin-bottom:24px; border-bottom:1px solid var(--border); padding-bottom:18px; }
+    .eyebrow { color:var(--green); font-weight:650; text-transform:uppercase; letter-spacing:.1em; font-size:.76rem; }
+    .masthead h1 { margin:8px 0 4px; font-size:clamp(1.6rem,4vw,2.6rem); letter-spacing:-.035em; }
+    .masthead p { color:var(--muted-foreground); margin:0 0 14px; max-width:780px; }
+    .navigation { display:flex; flex-wrap:wrap; gap:12px; }
+    .navigation a { display:inline-flex; padding:7px 12px; border:1px solid var(--border); border-radius:8px; text-decoration:none; }
+    .navigation a:hover { background:var(--muted); }
+    .notice { background:#1f293b; border:1px solid #a16207; padding:12px 14px; border-radius:10px; margin:16px 0 24px; }
+    .notice strong { color:#fcd34d; }
+    .panel { padding:20px; background:#101d30; border:1px solid var(--border); border-radius:14px; }
+    .card { border:1px solid var(--border); border-radius:10px; background:#142137; }
+    .form-label { font-size:.85rem; }
+    .form-select { width:100%; font:inherit; color:var(--foreground); border:1px solid var(--border); border-radius:8px; padding:8px 10px; background:#1b2a42; }
+    .cursor-interaction { cursor:pointer; }
+    .text-small { font-size:.85rem; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .foot { color:var(--muted-foreground); margin-top:22px; font-size:.88rem; }
+    .implementation { margin-top:24px; display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(225px,1fr)); }
+    .implementation article { border:1px solid var(--border); padding:16px; border-radius:10px; background:#101d30; }
+    .implementation h3 { font-size:1rem; margin:0 0 5px; }
+    .implementation p { color:var(--muted-foreground); margin:0; font-size:.9rem; }
+    @media(max-width:650px) { .page { padding:20px 12px 44px; } .panel { padding:10px; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div class="eyebrow">Robot Dreams · Node.js PRO · Lecture 32</div>
+      <h1>CI/CD Control Tower</h1>
+      <p>Інтерактивна карта якості та релізу. Натисніть будь-який етап, щоб розгорнути всі перевірки; перемикайте сценарії, щоб побачити вплив помилки на downstream jobs.</p>
+      <nav class="navigation" aria-label="Навігація проєкту">
+        <a href="https://github.com/Digberi/github-actions-control-tower">Репозиторій</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions">Живі GitHub Actions</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
+      </nav>
+    </header>
+    <div class="notice" role="note"><strong>Це схема цільового heavy CI/CD, а не телеметрія реальних запусків.</strong> Перший робочий зріз уже має unit, integration, E2E, API contract, architecture, secret patterns, HTTP performance, Docker build/smoke та GitHub Pages. Решта 32 гейтів позначені в ТЗ як наступні етапи.</div>
+    <section class="panel" aria-label="Інтерактивний CI/CD pipeline">
+<div id="cicd-tower-v1" class="ct-root">
+  <style>
+    #cicd-tower-v1 { color:var(--foreground); width:100%; }
+    #cicd-tower-v1 .ct-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    #cicd-tower-v1 .ct-heading h2 { margin:0; font-weight:500; }
+    #cicd-tower-v1 .ct-sub { color:var(--muted-foreground); margin:5px 0 0; }
+    #cicd-tower-v1 .ct-control { display:flex; flex-direction:column; gap:5px; min-width:195px; }
+    #cicd-tower-v1 .ct-control label { color:var(--muted-foreground); }
+    #cicd-tower-v1 .ct-rail { display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:16px; }
+    #cicd-tower-v1 .ct-arrow { color:var(--muted-foreground); text-align:center; font-weight:500; }
+    #cicd-tower-v1 .ct-branch-title { text-align:center; color:var(--muted-foreground); margin-top:3px; }
+    #cicd-tower-v1 .ct-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:100%; margin:5px 0; }
+    #cicd-tower-v1 .ct-node { border:1px solid var(--border); background:color-mix(in srgb,var(--muted) 55%,transparent); border-radius:8px; padding:9px 11px; min-width:0; text-align:left; color:var(--foreground); outline-offset:2px; }
+    #cicd-tower-v1 .ct-node:focus-visible { outline:2px solid var(--ring); }
+    #cicd-tower-v1 .ct-node[aria-pressed="true"] { box-shadow:inset 0 0 0 1px var(--primary); }
+    #cicd-tower-v1 .ct-node[data-state="green"] { border-color:color-mix(in srgb,var(--green) 50%,var(--border)); }
+    #cicd-tower-v1 .ct-node[data-state="failed"] { border-color:var(--red); background:color-mix(in srgb,var(--red) 12%,transparent); }
+    #cicd-tower-v1 .ct-node[data-state="skipped"] { opacity:.45; }
+    #cicd-tower-v1 .ct-node[data-state="rollback"] { border-color:var(--orange); background:color-mix(in srgb,var(--orange) 12%,transparent); }
+    #cicd-tower-v1 .ct-node-title { font-weight:500; display:block; }
+    #cicd-tower-v1 .ct-node-meta { color:var(--muted-foreground); display:block; margin-top:3px; }
+    #cicd-tower-v1 .ct-category { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; background:var(--viz-series-1); vertical-align:middle; }
+    #cicd-tower-v1 .ct-category.tests { background:var(--viz-series-2); }
+    #cicd-tower-v1 .ct-category.security { background:var(--viz-series-3); }
+    #cicd-tower-v1 .ct-category.performance { background:var(--viz-series-4); }
+    #cicd-tower-v1 .ct-middle { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:min(100%,660px); margin:3px auto; align-items:stretch; }
+    #cicd-tower-v1 .ct-main { width:min(100%,660px); margin:2px auto; }
+    #cicd-tower-v1 .ct-main .ct-node { width:100%; text-align:center; }
+    #cicd-tower-v1 .ct-flowline { border-left:1px solid var(--border); height:12px; }
+    #cicd-tower-v1 .ct-split { width:66%; height:13px; border:1px solid var(--border); border-bottom:0; border-radius:7px 7px 0 0; margin:2px auto 0; }
+    #cicd-tower-v1 .ct-join { width:66%; height:13px; border:1px solid var(--border); border-top:0; border-radius:0 0 7px 7px; margin:0 auto 2px; }
+    #cicd-tower-v1 .ct-legend { display:flex; gap:13px; flex-wrap:wrap; margin-top:12px; color:var(--muted-foreground); }
+    #cicd-tower-v1 .ct-legend span { display:inline-flex; gap:5px; align-items:center; }
+    #cicd-tower-v1 .ct-dot { width:8px; height:8px; border-radius:50%; background:var(--green); display:inline-block; }
+    #cicd-tower-v1 .ct-dot.fail { background:var(--red); }
+    #cicd-tower-v1 .ct-dot.skip { background:var(--border); }
+    #cicd-tower-v1 .ct-dot.rollback { background:var(--orange); }
+    #cicd-tower-v1 .ct-info { margin-top:14px; padding:12px 14px; }
+    #cicd-tower-v1 .ct-info-title { font-weight:500; }
+    #cicd-tower-v1 .ct-info-text { color:var(--muted-foreground); margin-top:5px; }
+    #cicd-tower-v1 .ct-info-list { margin:8px 0 0; padding-left:20px; columns:2; column-gap:22px; }
+    #cicd-tower-v1 .ct-info-list li { break-inside:avoid; margin:2px 0; }
+    #cicd-tower-v1 .ct-note { color:var(--muted-foreground); margin-top:9px; }
+    @media(max-width:650px) {
+      #cicd-tower-v1 .ct-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #cicd-tower-v1 .ct-split,#cicd-tower-v1 .ct-join { display:none; }
+      #cicd-tower-v1 .ct-info-list { columns:1; }
+    }
+    @media(max-width:420px) {
+      #cicd-tower-v1 .ct-grid { gap:6px; }
+      #cicd-tower-v1 .ct-node { padding:8px; }
+      #cicd-tower-v1 .ct-middle { grid-template-columns:1fr; }
+    }
+  </style>
+
+  <div class="ct-heading">
+    <div>
+      <h2>CI/CD Control Tower</h2>
+      <p class="ct-sub">План стенда · 32 гейти · від PR до production та rollback</p>
+    </div>
+    <div class="ct-control">
+      <label for="ct-scenario" class="form-label">Що відбувається, якщо…</label>
+      <select id="ct-scenario" class="form-select">
+        <option value="happy">Усі гейти проходять</option>
+        <option value="contract">Зламано API-контракт</option>
+        <option value="security">Знайдено секрет або CVE</option>
+        <option value="performance">Погіршилась продуктивність</option>
+        <option value="approval">Відхилено prod approval</option>
+        <option value="rollout">Впав post-deploy smoke</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="ct-rail" role="group" aria-label="Послідовність CI/CD pipeline">
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="pr"><span class="ct-node-title">① Pull request <span class="ct-node-meta">untrusted code · без cloud secrets</span></span></div></div>
+    <div class="ct-arrow">↓</div>
+    <div class="ct-branch-title">Паралельні перевірки PR</div>
+    <div class="ct-split" aria-hidden="true"></div>
+    <div class="ct-grid">
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="code"><span class="ct-node-title"><i class="ct-category"></i>Code quality</span><span class="ct-node-meta">G01–G07 · lint, types, unit, matrix</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="tests"><span class="ct-node-title"><i class="ct-category tests"></i>Tests & contracts</span><span class="ct-node-meta">G08–G15 · DB, E2E, API, архітектура</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="security"><span class="ct-node-title"><i class="ct-category security"></i>Security & supply chain</span><span class="ct-node-meta">G16–G23 · SAST, CVE, SBOM, policy</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="performance"><span class="ct-node-title"><i class="ct-category performance"></i>Performance & cost</span><span class="ct-node-meta">G25–G26 · k6, Pulumi Δcost</span></div>
+    </div>
+    <div class="ct-join" aria-hidden="true"></div>
+    <div class="ct-arrow">↓</div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="required"><span class="ct-node-title">② Required checks · G32</span><span class="ct-node-meta">Хоча б один червоний → merge заблокований</span></div></div>
+    <div class="ct-arrow">↓</div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="release"><span class="ct-node-title">③ Merge main → Build once → GHCR</span><span class="ct-node-meta">G21–G24 · scan, SBOM, attestation, immutable digest</span></div></div>
+    <div class="ct-arrow">↓</div>
+    <div class="ct-middle">
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="staging"><span class="ct-node-title">④ Deploy staging</span><span class="ct-node-meta">G27 + G29 · OIDC, migration, health & smoke</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="approval"><span class="ct-node-title">⑤ Production approval</span><span class="ct-node-meta">G28 · GitHub Environment / reviewer</span></div>
+    </div>
+    <div class="ct-arrow">↓</div>
+    <div class="ct-main"><div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="production"><span class="ct-node-title">⑥ Production · той самий digest</span><span class="ct-node-meta">G30 · rolling / canary, availability, post-deploy checks</span></div></div>
+    <div class="ct-arrow">↓</div>
+    <div class="ct-middle">
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="healthy"><span class="ct-node-title">✓ Healthy release</span><span class="ct-node-meta">спостереження · метрики · deployment record</span></div>
+      <div class="ct-node cursor-interaction" role="button" tabindex="0" aria-pressed="false" data-node="rollback"><span class="ct-node-title">↶ Rollback · G31</span><span class="ct-node-meta">попередній digest → повторний smoke</span></div>
+    </div>
+  </div>
+
+  <div class="ct-legend text-small">
+    <span><i class="ct-dot"></i> пройдено у сценарії</span>
+    <span><i class="ct-dot fail"></i> блокує</span>
+    <span><i class="ct-dot skip"></i> не запускається</span>
+    <span><i class="ct-dot rollback"></i> recovery</span>
+  </div>
+  <div id="ct-info" class="card ct-info" aria-live="polite">
+    <div id="ct-info-title" class="ct-info-title">Оберіть етап на схемі</div>
+    <div id="ct-info-text" class="ct-info-text">Натисніть будь-який блок, щоб побачити його гейти й гарантію.</div>
+    <ul id="ct-info-list" class="ct-info-list" hidden></ul>
+  </div>
+  <div id="ct-result" class="ct-note" aria-live="polite">Симуляція: усі гейти пройдені, той самий digest просунуто у production.</div>
+  <div class="sr-only">Концептуальна схема майбутнього стенда. Це не статус реальних GitHub Actions прогонів.</div>
+
+  <script>
+  (function(){
+    const root=document.getElementById("cicd-tower-v1");
+    const groups={
+      pr:{title:"PR — межа довіри",text:"Код із pull request перевіряється без довгоживучих cloud credentials та privileged deploy permissions.",list:["pull_request trigger","мінімальний GITHUB_TOKEN","не виконувати недовірений код із привілейованим token"]},
+      code:{title:"G01–G07 · Code Quality",text:"Дешеві перевірки — швидкий feedback до запуску дорогих job.",list:["G01 · actionlint","G02 · YAML / shell / Dockerfile lint","G03 · ESLint / formatting","G04 · TypeScript typecheck","G05 · unit tests","G06 · coverage threshold","G07 · Node/OS compatibility matrix"]},
+      tests:{title:"G08–G15 · Integration, Contracts, Architecture",text:"Зелений unit не доводить сумісність API, міграцій чи виконання архітектурних правил.",list:["G08 · PostgreSQL integration","G09 · API E2E","G10 · OpenAPI backward compatibility","G11 · Pact consumer contract","G12 · event/schema compatibility (якщо є події)","G13 · DB migration safety","G14 · dependency-cruiser boundaries","G15 · dependency cycle detection"]},
+      security:{title:"G16–G23 · Security & Supply Chain",text:"Виявлення проблеми має перетворитися на blocking policy; SBOM і provenance не рівнозначні CVE scanner.",list:["G16 · secret scanning","G17 · SAST","G18 · dependency vulnerabilities / SCA","G19 · license policy","G20 · IaC & Kubernetes policy","G21 · image CVE scanning","G22 · SBOM completeness","G23 · artifact attestation / provenance verification"]},
+      performance:{title:"G25–G26 · Performance & Cost",text:"Поріг повинен бути стабільним і вимірюваним; required check має реальний exit status.",list:["G25 · k6 smoke; p95, failed requests, HTML report","G26 · Pulumi preview → Δcost → budget gate"]},
+      required:{title:"G32 · Required Checks",text:"GitHub repository ruleset визначає, які статуси блокують merge. Ненульовий exit сам по собі — ще не branch protection.",list:["Зелений → merge дозволено","Червоний → merge заборонено","Evidence/логи залишаються доступними"]},
+      release:{title:"Release · Build Once",text:"Release image збирається й публікується один раз, потім staging і production використовують однаковий registry digest.",list:["G21 · scan image","G22 · SBOM","G23 · provenance attestation","G24 · digest equality / no rebuild","GHCR через короткоживучий GITHUB_TOKEN"]},
+      staging:{title:"G27 + G29 · Staging",text:"Deployment job отримує короткоживучі credentials лише в довіреному контексті, виконує migration та post-deploy smoke.",list:["G27 · OIDC issuer/audience/subject/STS","G29 · readiness + health + HTTP smoke","Перевірка migration compatibility","Збереження deployment record із digest"]},
+      approval:{title:"G28 · Production Approval",text:"GitHub Environment відокремлює дозвіл на деплой від branch protection та результату CI.",list:["required reviewers, якщо доступно за планом","deployment branches/tags","concurrency та захист від конфліктних деплоїв","environment-specific permissions"]},
+      production:{title:"G30 · Production Rollout",text:"Просування того самого артефакту без rebuild, контроль rolling/canary та availability.",list:["image@sha256 — як на staging","rolling update / canary","readiness/availability / smoke","відмова → recovery path"]},
+      healthy:{title:"Healthy Release",text:"Гарантії визначаються проведеними перевірками; green не доводить відсутність усіх можливих дефектів.",list:["digest + commit SHA + run ID","післярелізні метрики","audit trail та deployment record"]},
+      rollback:{title:"G31 · Rollback",text:"Коли post-deploy gate впав, повертаємо вже відомий попередній образ без rebuild і повторюємо smoke.",list:["попередній перевірений digest","workflow_dispatch + approval","rollback deployment","health та smoke після відкату","DB rollback не є автоматичним"]}
+    };
+    const scenarios={
+      happy:{fail:null,text:"Усі гейти пройдені → merge → release → staging → approval → production. Rollback не потрібен."},
+      contract:{fail:"tests",text:"G10 контракт червоний → required check блокує merge. Build release та deploy не стартують."},
+      security:{fail:"security",text:"Security gate червоний → зміна залишається в PR; privileged jobs не стартують."},
+      performance:{fail:"performance",text:"G25 performance threshold червоний → merge заблокований; report залишається в artifacts."},
+      approval:{fail:"approval",text:"Staging зелений, але production approval відхилено → production deploy не стартує."},
+      rollout:{fail:"production",text:"CI і staging зелені, але post-deploy smoke впав → recovery повертає попередній digest."}
+    };
+    const ids=["pr","code","tests","security","performance","required","release","staging","approval","production","healthy","rollback"];
+    let selected=null;
+    function select(id){
+      selected=id;const item=groups[id];
+      root.querySelectorAll("[data-node]").forEach(n=>n.setAttribute("aria-pressed",String(n.dataset.node===id)));
+      root.querySelector("#ct-info-title").textContent=item.title;
+      root.querySelector("#ct-info-text").textContent=item.text;
+      const list=root.querySelector("#ct-info-list");list.innerHTML="";
+      item.list.forEach(s=>{const li=document.createElement("li");li.textContent=s;list.appendChild(li)});
+      list.hidden=false;
+    }
+    root.querySelectorAll("[data-node]").forEach(n=>{
+      n.addEventListener("click",()=>select(n.dataset.node));
+      n.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(n.dataset.node)}});
+    });
+    function draw(){
+      const key=root.querySelector("#ct-scenario").value;
+      const sc=scenarios[key], failed=sc.fail;
+      let skip=false;
+      ids.forEach(id=>{
+        const n=root.querySelector('[data-node="'+id+'"]');
+        let state="green";
+        if(id==="rollback")state=(key==="rollout")?"rollback":"skipped";
+        else if(id==="healthy")state=(key==="happy")?"green":"skipped";
+        else if(failed==="tests"||failed==="security"||failed==="performance"){
+          if(id===failed)state="failed";
+          if(["required","release","staging","approval","production"].includes(id))state=id==="required"?"failed":"skipped";
+        }else if(failed==="approval"){
+          if(id==="approval")state="failed";
+          if(id==="production")state="skipped";
+        }else if(failed==="production"&&id==="production")state="failed";
+        n.dataset.state=state;
+      });
+      root.querySelector("#ct-result").textContent="Симуляція: "+sc.text;
+    }
+    root.querySelector("#ct-scenario").addEventListener("change",draw);
+    draw();
+  })();
+  </script>
+</div>
+
+    </section>
+    <section class="implementation" aria-label="Рівні реалізації">
+      <article><h3>Працює локально</h3><p>npm run check, тестові сценарії, контрольовані RED/GREEN.</p></article>
+      <article><h3>Workflow у репозиторії</h3><p>PR gates, матриця Node, build/smoke, реліз до GHCR і GitHub Pages. Реальні GitHub прогони слід перевірити після першого push.</p></article>
+      <article><h3>Доробка за ТЗ</h3><p>PostgreSQL, Pact, SAST, SCA, SBOM, provenance, Kubernetes, OIDC, approval, production rollout, rollback, policy/cost gates.</p></article>
+    </section>
+    <footer class="foot">Demo mode не змінює production і не використовує cloud secrets. Симуляція відображає лише логіку проходження гейтів.</footer>
+  </main>
+</body>
+</html>

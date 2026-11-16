@@ -1,0 +1,52 @@
+name: "03 · Controlled Red / Green"
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "One deliberately broken invariant"
+        type: choice
+        required: true
+        default: happy
+        options: [happy, unit, integration, contract, architecture, security, performance]
+
+permissions:
+  contents: read
+
+jobs:
+  demonstration:
+    name: "Scenario · ${{ inputs.scenario }}"
+    runs-on: ubuntu-latest
+    env:
+      CI_DEMO_SCENARIO: ${{ inputs.scenario }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - name: Execute selected real gate
+        shell: bash
+        run: |
+          case "$CI_DEMO_SCENARIO" in
+            happy) npm run check ;;
+            unit) npm run test:unit ;;
+            integration) npm run test:integration ;;
+            contract) npm run check:contract ;;
+            architecture) npm run check:architecture ;;
+            security) npm run check:secrets ;;
+            performance) npm run check:performance ;;
+            *) exit 2 ;;
+          esac
+      - name: Summarize demonstrator
+        if: always()
+        run: |
+          echo "## Classroom scenario: $CI_DEMO_SCENARIO" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CI_DEMO_SCENARIO" = happy ]; then
+            echo "Expected: GREEN" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Expected: RED (intentional)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "An intentionally red demo is not a failed production release." >> "$GITHUB_STEP_SUMMARY"

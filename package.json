@@ -1,0 +1,31 @@
+{
+  "name": "github-actions-control-tower",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lecture 32: observable GitHub Actions CI/CD demo with real gates and controlled failures",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "check:syntax": "node scripts/gates.mjs syntax",
+    "check:architecture": "node scripts/gates.mjs architecture",
+    "check:contract": "node scripts/gates.mjs contract",
+    "check:secrets": "node scripts/gates.mjs secrets",
+    "check:workflows": "node scripts/gates.mjs workflows",
+    "check:performance": "node scripts/gates.mjs performance",
+    "test:unit": "node --test tests/unit.test.mjs",
+    "test:integration": "node --test tests/integration.test.mjs",
+    "test:e2e": "node --test tests/e2e.test.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm run check:syntax && npm run check:architecture && npm run check:contract && npm run check:secrets && npm test && npm run check:performance",
+    "demo:happy": "node scripts/demo.mjs happy",
+    "demo:unit": "node scripts/demo.mjs unit",
+    "demo:integration": "node scripts/demo.mjs integration",
+    "demo:contract": "node scripts/demo.mjs contract",
+    "demo:architecture": "node scripts/demo.mjs architecture",
+    "demo:security": "node scripts/demo.mjs security",
+    "demo:performance": "node scripts/demo.mjs performance"
+  }
+}
