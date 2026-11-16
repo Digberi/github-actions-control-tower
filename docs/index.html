@@ -76,6 +76,8 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680">G04 TypeScript: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799">OS matrix: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867">Windows matrix: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43955060328">G09 E2E: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43955108982">G09 E2E: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43900813599">k6 p95: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/LECTURE_DEMO.md">Сценарій live demo</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
@@ -257,7 +259,7 @@
       G05:{fail:"code",text:"G05 unit RED: ціновий інваріант не виконується, required блокує merge."},
       G07:{fail:"code",text:"G07 RED: POSIX-only separator зламався ТІЛЬКИ на справжньому Windows runner. Ubuntu Node 22/24 і macOS 22 — GREEN; fail-fast=false."},
       G08:{fail:"tests",text:"G08 integration RED: HTTP створення order повернуло неправильний status."},
-      G09:{fail:"tests",text:"G09 E2E RED: API для відсутнього order повертає 200 замість 404, test assertion блокує merge; локальне RED/GREEN підтверджено."},
+      G09:{fail:"tests",text:"G09 E2E RED: API для відсутнього order повертає 200 замість 404, справжній GitHub test assertion завершується exit 1. Пара RED/GREEN і артефакти перевірені."},
       G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний RED run і додано oasdiff для OpenAPI schema."},
       G11:{fail:"tests",text:"G11 independent consumer RED: зламано очікування клієнта, хоча unit producer green."},
       G13:{fail:"tests",text:"G13 migration RED: DROP COLUMN не проходить expand-only policy, стару версію треба зберегти."},
@@ -272,7 +274,7 @@
       G27:{fail:"staging",text:"G27 локально підписаний RSA JWT має чужий OIDC subject. Цей gate не припускає cloud STS."}
     });
     const realRedEvidence={
-      G03:"43954058276", G04:"43954113680", G07:"43954175867",
+      G03:"43954058276", G04:"43954113680", G07:"43954175867", G09:"43955060328",
       G10:"43899543939", G25:"43900813599", G27:"43894863175"
     };
     const ids=["pr","code","tests","security","performance","required","release","staging","approval","production","healthy","rollback"];

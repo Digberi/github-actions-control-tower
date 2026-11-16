@@ -47,6 +47,10 @@ const liveEvidence = {
     red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867",
     green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799"
   },
+  G09: {
+    red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43955060328",
+    green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43955108982"
+  },
   G10: {
     red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939",
     green: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220"

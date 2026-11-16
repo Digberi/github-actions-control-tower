@@ -16,6 +16,8 @@
 | G04: true TypeScript TS2322 string → number mismatch | 🔴 EXPECTED RED, exit 1 + artifact | [43954113680](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680) |
 | G07: real four-runner Ubuntu/macOS/Windows matrix | ✅ GREEN 4/4 | [43953382799](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799) |
 | G07: POSIX path separator assumption | 🔴 EXPECTED RED, Windows fails; Ubuntu 22/24 and macOS pass; artifact each | [43954175867](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867) |
+| G09: actual API E2E unknown-route 200 ≠ 404 | 🔴 EXPECTED RED, exit 1 + JSON artifact | [43955060328](https://github.com/Digberi/github-actions-control-tower/actions/runs/43955060328) |
+| G09: API E2E restored 404 invariant | ✅ GREEN + JSON artifact | [43955108982](https://github.com/Digberi/github-actions-control-tower/actions/runs/43955108982) |
 | G02: реальний yamllint + Hadolint (після виправлення Dockerfile) | ✅ GREEN | [43898394391](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391) |
 | G02: Hadolint помітив shell-form HEALTHCHECK | 🔴 EXPECTED FIX CYCLE | [43897556010](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897556010) |
 | G02: Hadolint помітив нечисловий USER | 🔴 EXPECTED FIX CYCLE | [43898053537](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898053537) |
@@ -59,11 +61,12 @@
    офлайн за `iss/aud/sub/exp`. Це **не реальний AWS STS exchange**.
 3. **G02 Hadolint** — показовий fail → fix → fail наступного правила →
    fix → green. Жоден результат не підмінявся.
-4. **G03/G04/G07** — реальні RED jobs на GitHub runners (не симуляція
+4. **G03/G04/G07/G09** — реальні RED jobs на GitHub runners (не симуляція
    повідомлення про помилку). `ESLint` повідомив `eqeqeq` і `semi`,
    `tsc` — `TS2322`, а Windows спіймав некоректне POSIX-only припущення;
-   три інші matrix combinations залишилися зеленими. Всі failed jobs
-   виконали `upload-artifact` успішно.
+   три інші matrix combinations залишилися зеленими. Для G09 E2E справді
+   спостерігали `200 !== 404` і перевірили виправлення на окремому GREEN run.
+   Всі failed jobs виконали `upload-artifact` успішно.
 5. **G10 oasdiff** — ручний [перший RED attempt 43898787400](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898787400)
    виявив підступний **false-green**: без `--fail-on ERR` oasdiff публікував
    breaking-change report, але повертав exit 0. [PR #4](https://github.com/Digberi/github-actions-control-tower/pull/4)

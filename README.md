@@ -97,7 +97,7 @@ npm run demo:cleanup -- --scope lecture --dry-run
 Для вибору Gxx відкрий **Actions → Controlled Red / Green → Run workflow**.
 Фікстури OIDC — локальні RS256 підписи, **не** справжні GitHub JWT або AWS STS.
 Із 18 пар дві (G03/G04) вимагають окремого `quality:bootstrap`; решта
-16 виконуються без цього toolchain. Для готових результатів G03/G04/G07
+16 виконуються без цього toolchain. Для готових результатів G03/G04/G07/G09
 доступний `--target prepared` з реально перевіреними RED/GREEN run URLs.
 
 ## Демонстрація RED / GREEN без редагування репозиторію
