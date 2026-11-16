@@ -14,9 +14,13 @@ const option = key => {
 };
 
 const cases = {
+  G03: { title: "ESLint and Prettier violations (bootstrap required)", quality: true },
+  G04: { title: "Strict TypeScript DTO mismatch (bootstrap required)", quality: true },
   G05: { title: "Unit pricing invariant", command: "test:unit", failure: "unit" },
   G08: { title: "HTTP integration invariant", command: "test:integration", failure: "integration" },
+  G09: { title: "Actual API E2E order lifecycle and 404 semantics", command: "test:e2e", failure: "e2e" },
   G10: { title: "Backward-compatible API response", command: "check:contract", failure: "contract" },
+  G07: { title: "Node/OS compatibility matrix (local Windows path emulation)", command: "check:platform", failure: "matrix" },
   G11: { title: "Independent HTTP consumer contract", command: "test:consumer", failure: "consumer" },
   G13: { title: "Expand-only migration safety", heavy: true },
   G14: { title: "Domain to transport import forbidden", command: "check:architecture", failure: "boundary" },
@@ -31,6 +35,8 @@ const cases = {
 };
 
 const liveEvidence = {
+  G09: null,
+  G07: null,
   G10: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43889707611",
   G27: {
     red: "https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175",
@@ -106,9 +112,11 @@ function runCase() {
   const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
   const invocation = test.heavy
     ? [process.execPath, ["scripts/heavy-gates.mjs", id, mode]]
-    : [cmd, ["run", test.command]];
+    : test.quality
+      ? [process.execPath, ["scripts/quality-check.mjs", id, mode]]
+      : [cmd, ["run", test.command]];
   const env = { ...process.env };
-  if (!test.heavy && mode === "red") env.CI_DEMO_SCENARIO = test.failure;
+  if (!test.heavy && !test.quality && mode === "red") env.CI_DEMO_SCENARIO = test.failure;
   else delete env.CI_DEMO_SCENARIO;
   const started = Date.now();
   process.stdout.write("RUN " + id + " " + mode + " (" + target + ")\n");

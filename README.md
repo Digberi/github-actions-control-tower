@@ -37,6 +37,29 @@ npm run check:coverage
 npm run check:sbom
 ~~~
 
+### G03/G04/G07/G09 — розширення для перевірки якості
+
+Нові окремі workflows додають реальні **ESLint + Prettier**, **tsc strict DTO**,
+**Node/OS matrix** (Ubuntu 22/24, macOS 22, Windows 22) та E2E RED.
+Інструменти G03/G04 встановлюються **локально у відокремлений каталог**,
+не змінюючи application `package-lock.json`:
+
+~~~bash
+npm run quality:bootstrap
+npm run check:style
+npm run check:types:demo
+npm run check:platform
+npm run demo:case -- --id G03 --mode red --target local
+npm run demo:case -- --id G04 --mode red --target local
+npm run demo:case -- --id G07 --mode red --target local
+npm run demo:case -- --id G09 --mode red --target local
+~~~
+
+G03 перевіряє реальний domain module та вузький style fixture, G04 — strict
+TypeScript DTO, **не весь JavaScript API**. У G07 локальний RED використовує
+чітко позначену Windows-path emulation, а RED GitHub workflow перевіряє
+**справжній Windows runner**. Не називати локальну емуляцію виконанням Windows.
+
 Робочий API:
 
 ~~~bash
