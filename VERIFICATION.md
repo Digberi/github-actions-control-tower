@@ -7,6 +7,9 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| P3 nightly: actual 20s six-client HTTP soak, 88,521 order create/read cycles, 181,470 HTTP requests, 0 errors, p95 1.54ms | ✅ GREEN, JSON artifact | [43968370280](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) |
+| P3 nightly: actual seeded property tests plus `CI_DEMO_SCENARIO=unit` mutant detected by failing assertions | ✅ MUTANT KILLED, JSON evidence | [43968370280](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) |
+| G25 PR quick soak: 3s, 16,726 HTTP requests, 0 errors, p95 2.67ms | ✅ GREEN, JSON artifact | [43968155397](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968155397) |
 | G05 property fuzz: arithmetic loses integer precision beyond MAX_SAFE_INTEGER; missing expected TypeError | 🔴 EXPECTED RED, real assertion + TAP artifact, required PR failed | [43967673291](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291) |
 | G05 property fuzz: Number.isSafeInteger guards both line and cumulative cents, 3,000 seeded examples | ✅ GREEN | [43967957021](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021) |
 | G20: real Trivy config scanner found 5 HIGH/CRITICAL in generated insecure Kubernetes Deployment, exit 1, JSON artifact | 🔴 EXPECTED RED | [43966679118](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118) |

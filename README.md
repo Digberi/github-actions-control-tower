@@ -10,6 +10,7 @@
 14 advanced demo-сценаріїв — у [IMPLEMENTATION_BRIEF.md](IMPLEMENTATION_BRIEF.md).
 Поточний стан по кожному G01–G32 — [CHECKS_MATRIX.md](CHECKS_MATRIX.md).
 Фактичні GitHub прогони — [VERIFICATION.md](VERIFICATION.md).
+**Налаштування, які потребують прав власника / AWS:** [docs/OPERATOR_HANDOFF.md](docs/OPERATOR_HANDOFF.md).
 **Для проведення лекції:** [18-хвилинний сценарій із прямими посиланнями на GREEN/RED jobs](LECTURE_DEMO.md).
 
 ## Інтерактивна візуалізація
@@ -135,7 +136,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 | `02 · Trusted Build and Publish` | push main, manual | GHCR digest + Sigstore attestation/verification → Docker smoke → kind K8s rollout/rollback |
 | `03 · Controlled Red / Green` | manual із scenario або gate+mode | real RED job, session-scoped JSON artifact |
 | `04 · Interactive HTML Demo` | docs change on main, manual | GitHub Pages із `docs/` |
-| `05 · Scheduled Deep Checks` | Mondays, manual | npm audit, coverage report (поки без threshold), performance smoke |
+| `05 · Scheduled Deep Checks` | Mondays, manual, main changes | npm audit + coverage + real 3,000-seed property tests, killed arithmetic mutant, 20s HTTP soak (88k+ verified order cycles) |
 | `Reusable · Ephemeral kind Deployment` | workflow_call | 2 pod replicas, digest, live probes, availability, undo |
 | `06 · Manual Rollback Drill` | manual | відтворюваний kind rollback без rebuild |
 | `07 · Real k6 Performance Gate` | PR, manual green/red | справжній k6 p95/failed rate thresholds + JSON report |
@@ -145,6 +146,8 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 | `11 · YAML and Dockerfile Linters` | PR, manual | реальний yamllint + Hadolint; actionlint містить ShellCheck |
 | `12 · Real OS and Node Compatibility Matrix` | PR, manual green/red | Ubuntu Node 22/24, macOS 22, Windows 22; керований Windows-only RED |
 | `13 · Real ESLint Prettier and TypeScript` | PR, manual G03/G04 green/red | ізольовано встановлені реальні інструменти й machine-readable reports |
+| `14 · Real Secret and License Security Gates` | reusable PR, manual red/green | Gitleaks real source scan + actual installed npm dependency licenses; RED/GREEN JSON evidence |
+| `15 · Trivy Kubernetes IaC Policy` | reusable PR, manual red/green | actual Trivy config on real infra/k8s; 5 HIGH/CRITICAL red fixture; green source scan |
 
 Після першого push:
 
@@ -166,14 +169,14 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 
 ## Що означають і що НЕ означають зелені статуси
 
-- Сканер `check:secrets` — прості патерни, не заміна Gitleaks.
+- `check:secrets` локально — прості патерни; справжній Gitleaks окремо працює у reusable security workflow.
 - `check:contract` перевіряє backward compatibility невеликого JSON-контракту,
   не OAS/OpenAPI semantics чи Pact.
 - `check:performance` — швидкий локальний HTTP smoke; окремий workflow виконує справжній k6.
 - `test:integration` використовує HTTP/in-memory; окремий `test:postgres` перевіряє реальну БД.
 - `staging-kind` розгортає **тимчасовий kind на runner**, не постійний cloud staging.
 - G30/G31 — actual bad rollout + undo у kind, не production rollback.
-- G19/G20/G24/G26 fixtures — вузькі policy demonstrations, а не повний Pulumi/OPA scanner.
+- G19 сканує фактично встановлені npm-ліцензії, G20 використовує справжній Trivy config. Старі fixtures збережено окремо. G26 cost preview досі synthetic; OPA/Rego не інтегровано.
 - Візуалізація всіх 32 гейтів — архітектурна мета, а не доказ виконання.
 
 ## Для coding-агента

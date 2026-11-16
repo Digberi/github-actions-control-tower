@@ -1,7 +1,7 @@
 # G01–G32 — reality check
 
 This matrix distinguishes **local implementation** from **verified remote execution**.
-Multiple implementation pull requests have been merged on 2026-11-16 (through PR #10), with PR #11 proving G16/G19 RED/GREEN. Real runner
+Implementation PRs #1–#13 were merged on 2026-11-16; #11 proved G16/G19 RED/GREEN, #12 proved Trivy G20 RED/GREEN, #13 proved property-based safety RED/GREEN. Real runner
 evidence includes [PR #8](https://github.com/Digberi/github-actions-control-tower/pull/8),
 [Sigstore + kind release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325),
 [real linter](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391)
@@ -38,14 +38,16 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G22 | SBOM completeness | READY NPM + REMOTE | real npm CycloneDX SBOM (14 components) + PURL and pg requirement + PR artifact |
 | G23 | Attestation/provenance | READY REAL + REMOTE | trusted release GitHub Sigstore provenance and independent gh attestation verify both passed in [release 43897091325](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
 | G24 | Immutable promotion | READY KIND + REMOTE | verified real GHCR digest identical in Docker and kind deployment; no production |
-| G25 | Performance smoke | READY K6 + REMOTE RED/GREEN | [k6 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157); [k6 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43900813599) intentionally induced p95 ~1.6s vs 800ms threshold, artifact uploaded |
+| G25 | Performance smoke + soak | READY K6 + REMOTE RED/GREEN | [k6 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43896867157); [k6 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43900813599) intentionally induced p95 ~1.6s vs 800ms. [PR 3s soak GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968155397) 16,726 HTTP calls, 0 errors; [nightly 20s soak GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) 181,470 HTTP calls, 0 errors, p95 1.54ms; real JSON artifacts. |
 | G26 | Cost budget preview | LOCAL FIXTURE | explicitly labeled synthetic Pulumi JSON and budget policy, no live cloud |
 | G27 | OIDC claims and STS | READY SYNTHETIC + REMOTE | signed local RSA JWT + reject tests; real [red](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) and [green](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) workflow, no real STS |
 | G28 | Production approval | CONFIG | no production deploy; requires environment setup |
 | G29 | Post-deploy smoke | READY KIND + REMOTE | kind real 2-pod deployment/readiness/Service HTTP smoke green |
 | G30 | Rolling/canary availability | READY KIND + REMOTE | kind maxUnavailable=0 + 25 HTTP checks during bad digest rollout, green |
 | G31 | Rollback | READY KIND + REMOTE | real failed rollout → kubectl rollout undo → original digest + smoke, green with artifact; no production |
-| G32 | Aggregate required checks | PARTIAL + REMOTE | `Required · PR Gate` aggregates core checks and G16/G19/G20 real security reusable jobs ([G20 aggregate proven](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967038492)); GitHub branch ruleset not configured. |
+| G32 | Aggregate required checks | PARTIAL + REMOTE | [Required PR Gate](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968155397) aggregates all core checks, G16/G19/G20 reusable gates, numeric property fuzz and 3s soak; GitHub branch ruleset **not** configured ([owner setup](docs/OPERATOR_HANDOFF.md)). |
+
+Extended nightly [property fuzz + killed mutant + true 20s soak](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) is GREEN with JSON artifacts; no production-scale testing is claimed.
 
 The diagram in [docs/index.html](docs/index.html) intentionally shows the
 complete **target** from the implementation brief. A green visualization
