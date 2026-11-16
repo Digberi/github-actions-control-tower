@@ -10,6 +10,10 @@ workflow runs, not screenshots or mocked JSON.
 | Controlled fixture: `happy` | **SUCCESS** | [run 43889811097](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889811097) |
 | GitHub Pages | **SUCCESS (rerun #2)** | [run 43889385204](https://github.com/Digberi/github-actions-control-tower/actions/runs/43889385204) |
 | Heavy PR (actionlint, real PostgreSQL, npm SBOM/audit, coverage, policy matrix, Docker) | **SUCCESS** | [run 43894228150](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894228150) |
+| GHCR digest → 2-pod kind rollout/readiness → broken rollout → 25 HTTP checks → kubectl undo | **SUCCESS** | [run 43894401938](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938) |
+| G27 OIDC policy / synthetic invalid subject | **EXPECTED FAILURE, artifact saved** | [run 43894863175](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) |
+| G27 OIDC policy / synthetic valid subject | **SUCCESS, artifact saved** | [run 43894983037](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) |
+| Interactive Pages after adding 11 gate selector options | **SUCCESS** | [run 43894552684](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894552684) |
 
 ## Confirmed evidence
 
@@ -33,6 +37,15 @@ workflow runs, not screenshots or mocked JSON.
   generated CycloneDX SBOM (with artifact), npm audit, Node 22/24,
   coverage threshold, and aggregate Required gate.
 - PR #1 was squash-merged into main as `1b88a7373fd95c99d33a02c620b9053b0e1338f6`.
+- The trusted release published digest
+  `ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f`.
+  Two Kubernetes pods became available in real kind; rollout with an
+  intentionally nonexistent digest retained service availability; the
+  status command failed as intended, and `kubectl rollout undo` restored
+  the original digest. All corresponding steps and artifact succeeded.
+- G27 RED returned a genuine failing GitHub job, and both RED/GREEN runs
+  uploaded separate machine-readable artifacts. It tested cryptographically
+  signed **synthetic local** JWTs, not GitHub-issued credentials or real AWS.
 
 ## Limits and follow-ups
 
@@ -43,8 +56,7 @@ workflow runs, not screenshots or mocked JSON.
 3. Pin all remaining GitHub Pages actions to supported full SHAs. The current
    checkout/setup-node pins work but GitHub warns about their Node 20
    runtime being forced to Node 24.
-4. Real CycloneDX SBOM and a separate PostgreSQL runner test are verified.
-   Real kind rollout/rollback requires a successful trusted release run and
-   will only be called verified when that run succeeds. No production,
-   OIDC role assumption, image attestation, or full CVE scan has been
-   evidenced. See `IMPLEMENTATION_BRIEF.md`.
+4. Real CycloneDX SBOM, PostgreSQL, kind deployment, availability drill,
+   and kind rollback are verified by actual workflow runs. There is still
+   no production deployment, real OIDC role assumption, image attestation,
+   or full CVE image scan. See `IMPLEMENTATION_BRIEF.md`.
