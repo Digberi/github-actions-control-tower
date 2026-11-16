@@ -1,0 +1,24 @@
+name: "06 · Manual Rollback Drill (kind only)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      previous_digest:
+        description: "Known-good immutable GHCR image; must be sha256, never a tag"
+        type: string
+        required: true
+        default: "ghcr.io/digberi/github-actions-control-tower@sha256:4db00595a95a405bc6f306f99c780e7a972dfe27b340150007551c3b876701b9"
+
+permissions:
+  contents: read
+
+jobs:
+  rollback-drill:
+    name: "Recreate old release · break rollout · undo"
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      image: ${{ inputs.previous_digest }}
+      environment: demo-rollback

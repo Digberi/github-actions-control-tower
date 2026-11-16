@@ -12,6 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  actionlint:
+    name: "G01 · actionlint (real YAML/action semantics)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Lint every workflow with official actionlint container
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.11 -color
+
   static:
     name: "Syntax · Architecture · Contract · Secrets · Workflow policy"
     runs-on: ubuntu-latest
@@ -29,6 +39,82 @@ jobs:
       - run: npm run check:contract
       - run: npm run check:secrets
       - run: npm run check:workflows
+      - name: G20 · Validate actual K8s deployment security policy
+        run: CHECK_REAL_K8S_MANIFEST=true node scripts/heavy-gates.mjs G20 green
+
+  policy:
+    name: "G19/G20/G24/G26/G27 · ${{ matrix.gate }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [G19, G20, G24, G26, G27]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Run narrow policy with controlled fixture
+        env:
+          GATE: ${{ matrix.gate }}
+        run: node scripts/heavy-gates.mjs "$GATE" green
+
+  supply_chain:
+    name: "G18/G22 · SCA audit and real CycloneDX SBOM"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - name: G18 · Actual npm vulnerability database check (high+)
+        run: npm audit --omit=dev --audit-level=high
+      - name: G22 · Produce machine-readable dependency inventory
+        run: |
+          mkdir -p reports
+          npm sbom --sbom-format cyclonedx > reports/sbom.cdx.json
+          node scripts/verify-sbom.mjs < reports/sbom.cdx.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: cyclonedx-sbom
+          path: reports/sbom.cdx.json
+          retention-days: 7
+
+  postgres:
+    name: "G08 · Real PostgreSQL transactions and idempotency"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci-demo-only
+          POSTGRES_DB: orders
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci -d orders"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgres://ci:ci-demo-only@127.0.0.1:5432/orders
+      PG_REQUIRED: "1"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:postgres
 
   unit:
     name: "Unit · Node ${{ matrix.node }}"
@@ -47,6 +133,19 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run test:unit
+
+  coverage:
+    name: "G06 · Unit coverage threshold ≥80%"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm run check:coverage
 
   integration:
     name: "Integration · Real HTTP"
@@ -100,7 +199,7 @@ jobs:
         run: |
           docker run -d --name ci-demo -p 127.0.0.1:3000:3000 ci-demo:pr
           trap 'docker logs ci-demo || true; docker stop ci-demo || true' EXIT
-          for attempt in $(seq 1 20); do
+          for _ in $(seq 1 20); do
             if curl --fail --silent http://127.0.0.1:3000/health; then
               exit 0
             fi
@@ -111,13 +210,18 @@ jobs:
   required:
     name: "Required · PR Gate"
     if: always()
-    needs: [static, unit, integration, e2e, performance, image]
+    needs: [actionlint, static, policy, supply_chain, postgres, unit, coverage, integration, e2e, performance, image]
     runs-on: ubuntu-latest
     steps:
       - name: Collect outcomes and enforce required checks
         env:
           STATIC: ${{ needs.static.result }}
+          ACTIONLINT: ${{ needs.actionlint.result }}
+          POLICY: ${{ needs.policy.result }}
+          SUPPLY_CHAIN: ${{ needs.supply_chain.result }}
+          POSTGRES: ${{ needs.postgres.result }}
           UNIT: ${{ needs.unit.result }}
+          COVERAGE: ${{ needs.coverage.result }}
           INTEGRATION: ${{ needs.integration.result }}
           E2E: ${{ needs.e2e.result }}
           PERFORMANCE: ${{ needs.performance.result }}
@@ -126,7 +230,7 @@ jobs:
           echo "## PR Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           printf '| Job | Result |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
           failed=0
-          for job in STATIC UNIT INTEGRATION E2E PERFORMANCE IMAGE; do
+          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE; do
             result="${!job}"
             printf '| %s | %s |\n' "$job" "$result" >> "$GITHUB_STEP_SUMMARY"
             if [ "$result" != success ]; then

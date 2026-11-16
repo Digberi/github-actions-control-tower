@@ -3,8 +3,10 @@
 Навчальний стенд із **реальними GitHub Actions workflows**, маленьким Node.js HTTP API,
 контрольованими RED/GREEN помилками та інтерактивною HTML-картою цільового heavy CI/CD.
 
-**Важлива межа:** це перевірюваний *перший вертикальний зріз*, а не повна
-реалізація всіх 32 гейтів. Повний план реалізації, критерії приймання й
+**Важлива межа:** це розширюваний стенд із реальним PostgreSQL, GHCR
+та тимчасовим Kubernetes-кластером на GitHub runner, але поки **не повна
+реалізація всіх 32 гейтів**. Деякі гейти демонструють вузькі політики
+на чесно позначених fixtures. Повний план реалізації, критерії приймання й
 14 advanced demo-сценаріїв — у [IMPLEMENTATION_BRIEF.md](IMPLEMENTATION_BRIEF.md).
 Поточний стан по кожному G01–G32 — [CHECKS_MATRIX.md](CHECKS_MATRIX.md).
 Фактичні GitHub прогони — [VERIFICATION.md](VERIFICATION.md).
@@ -29,6 +31,9 @@
 ~~~bash
 npm ci
 npm run check
+npm run check:heavy
+npm run check:coverage
+npm run check:sbom
 ~~~
 
 Робочий API:
@@ -36,10 +41,36 @@ npm run check
 ~~~bash
 npm start
 curl http://localhost:3000/health
+curl http://localhost:3000/health/live
+curl http://localhost:3000/health/ready
+curl http://localhost:3000/metrics
 curl -X POST http://localhost:3000/orders \
   -H "content-type: application/json" \
   -d '{"items":[{"quantity":2,"priceCents":199}]}'
 ~~~
+
+З `DATABASE_URL` запускається справжнє PostgreSQL-сховище з транзакціями
+та idempotency key. Без БД застосунок працює in-memory; у PR окрема job
+з PostgreSQL service container перевіряє concurrent retries і rollback.
+
+## Керований сценарій лектора (11 парних гейтів, 22 варіанти)
+
+~~~bash
+npm run demo:preflight
+npm run demo:list
+npm run demo:case -- --id G27 --mode red --target local --session lecture
+npm run demo:case -- --id G27 --mode green --target local --session lecture
+npm run demo:report
+npm run demo:show -- --id G10
+npm run demo:cleanup -- --scope lecture --dry-run
+~~~
+
+Контролер записує JSON у `reports/` із джерелом `LOCAL` або
+`GITHUB_REAL`. Локальний `red` вважається успішною **демонстрацією
+очікуваної помилки**, а у GitHub Actions реальний red гейт повертає
+`exit 1`, робить job червоною та зберігає evidence як artifact.
+Для вибору Gxx відкрий **Actions → Controlled Red / Green → Run workflow**.
+Фікстури OIDC — локальні RS256 підписи, **не** справжні GitHub JWT або AWS STS.
 
 ## Демонстрація RED / GREEN без редагування репозиторію
 
@@ -53,11 +84,8 @@ npm run demo:security       # generated fake secret pattern
 npm run demo:performance    # artificially slow response and p95 failure
 ~~~
 
-Локальний demo-controller повертає `0`, якщо отримано **очікуваний**
-результат (навіть навмисно червоний). У GitHub workflow
-**Controlled Red / Green** використовується безпосередньо *гейт*,
-а не controller: навмисна помилка повертає `exit 1` і робить job
-по-справжньому червоною.
+Старі короткі команди вище залишені для швидкого показу шести сценаріїв;
+новий контролер охоплює ще license, K8s, digest, cost та OIDC.
 
 ## GitHub Actions
 
@@ -74,11 +102,13 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 
 | Workflow | Trigger | Результат |
 |---|---|---|
-| `01 · PR Quality Gates` | PR, manual | паралельні static/unit matrix/integration/E2E/perf/Docker + агрегуючий required job |
-| `02 · Trusted Build and Publish` | push main, manual | перевірка → один Docker image → GHCR digest → ephemeral staging smoke **того самого digest** |
-| `03 · Controlled Red / Green` | manual із scenario | показує контрольований fail конкретного реального чека |
+| `01 · PR Quality Gates` | PR, manual | actionlint, PostgreSQL, coverage, policy matrix, CycloneDX, audit, static/unit/E2E/perf/Docker та required job |
+| `02 · Trusted Build and Publish` | push main, manual | GHCR digest → Docker smoke → kind K8s rollout/smoke/broken rollout/rollback |
+| `03 · Controlled Red / Green` | manual із scenario або gate+mode | real RED job, session-scoped JSON artifact |
 | `04 · Interactive HTML Demo` | docs change on main, manual | GitHub Pages із `docs/` |
 | `05 · Scheduled Deep Checks` | Mondays, manual | npm audit, coverage report (поки без threshold), performance smoke |
+| `Reusable · Ephemeral kind Deployment` | workflow_call | 2 pod replicas, digest, live probes, availability, undo |
+| `06 · Manual Rollback Drill` | manual | відтворюваний kind rollback без rebuild |
 
 Після першого push:
 
@@ -104,9 +134,10 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 - `check:contract` перевіряє backward compatibility невеликого JSON-контракту,
   не OAS/OpenAPI semantics чи Pact.
 - `check:performance` — локальний HTTP smoke, не load/soak і не k6.
-- `test:integration` працює з реальним HTTP-сервером, але **без PostgreSQL**.
-- Docker `staging-smoke` — ефермерний контейнер на GitHub runner,
-  **не deployment до справжнього staging-кластера**.
+- `test:integration` використовує HTTP/in-memory; окремий `test:postgres` перевіряє реальну БД.
+- `staging-kind` розгортає **тимчасовий kind на runner**, не постійний cloud staging.
+- G30/G31 — actual bad rollout + undo у kind, не production rollback.
+- G19/G20/G24/G26 fixtures — вузькі policy demonstrations, а не повний Pulumi/OPA scanner.
 - Візуалізація всіх 32 гейтів — архітектурна мета, а не доказ виконання.
 
 ## Для coding-агента
@@ -114,7 +145,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 Прочитай [AGENTS.md](AGENTS.md), потім
 [IMPLEMENTATION_BRIEF.md](IMPLEMENTATION_BRIEF.md).
 Працюй інкрементально; спочатку стабільні green/red прогонки, далі
-Postgres/Pact/SAST/SBOM/attestation/kind/approval/rollback. Не підміняй
+Pact/SAST/attestation/image scan/approval. Не підміняй
 компоненти макетами з фальшивим SUCCESS.
 
 ## Структура
@@ -127,6 +158,9 @@ contracts/                      baseline/current public API snapshots
 fixtures/                       controlled incompatible contract
 scripts/gates.mjs               real first-cut checks
 scripts/demo.mjs                local scenario orchestrator
+scripts/demo-controller.mjs     session-scoped red/green controller
+src/postgres.mjs                transactional database store
+infra/k8s/                     kind deployment with immutable digest
 .github/workflows/              PR, GHCR, scenarios, Pages, nightly
 IMPLEMENTATION_BRIEF.md         specification for agent implementation
 CHECKS_MATRIX.md                current implementation vs planned 32 gates

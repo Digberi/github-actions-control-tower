@@ -17,15 +17,26 @@ export function calculateTotal(items) {
 
 export function makeOrderStore() {
   const orders = new Map();
+  const keyed = new Map();
   return {
-    create(items) {
+    create(items, key) {
       const totalCents = calculateTotal(items);
+      if (key !== undefined && keyed.has(key)) {
+        const existing = keyed.get(key);
+        if (existing.fingerprint !== JSON.stringify(items)) {
+          const error = new Error("idempotency_key_conflict");
+          error.statusCode = 409;
+          throw error;
+        }
+        return existing.order;
+      }
       const order = {
         orderId: randomUUID(),
         status: "created",
         totalCents
       };
       orders.set(order.orderId, order);
+      if (key !== undefined) keyed.set(key, { fingerprint: JSON.stringify(items), order });
       return order;
     },
     get(id) {

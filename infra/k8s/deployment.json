@@ -1,0 +1,49 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": { "name": "control-tower", "labels": { "app": "control-tower" } },
+  "spec": {
+    "replicas": 2,
+    "strategy": {
+      "type": "RollingUpdate",
+      "rollingUpdate": { "maxSurge": 1, "maxUnavailable": 0 }
+    },
+    "selector": { "matchLabels": { "app": "control-tower" } },
+    "template": {
+      "metadata": { "labels": { "app": "control-tower" } },
+      "spec": {
+        "securityContext": { "runAsNonRoot": true, "runAsUser": 1000 },
+        "containers": [{
+          "name": "orders-api",
+          "image": "ghcr.io/digberi/github-actions-control-tower@sha256:4db00595a95a405bc6f306f99c780e7a972dfe27b340150007551c3b876701b9",
+          "imagePullPolicy": "IfNotPresent",
+          "ports": [{ "containerPort": 3000 }],
+          "securityContext": {
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true,
+            "capabilities": { "drop": ["ALL"] }
+          },
+          "resources": {
+            "requests": { "cpu": "20m", "memory": "32Mi" },
+            "limits": { "cpu": "200m", "memory": "128Mi" }
+          },
+          "readinessProbe": {
+            "httpGet": { "path": "/health/ready", "port": 3000 },
+            "initialDelaySeconds": 1,
+            "periodSeconds": 3
+          },
+          "livenessProbe": {
+            "httpGet": { "path": "/health/live", "port": 3000 },
+            "initialDelaySeconds": 3,
+            "periodSeconds": 10
+          },
+          "startupProbe": {
+            "httpGet": { "path": "/health/live", "port": 3000 },
+            "failureThreshold": 20,
+            "periodSeconds": 2
+          }
+        }]
+      }
+    }
+  }
+}
