@@ -97,8 +97,16 @@ npm run demo:cleanup -- --scope lecture --dry-run
 - AWS OIDC/STS не використовується. Claims перевіряються локальними
   підписаними синтетичними JWT.
 - Kind — тимчасовий Kubernetes на GitHub runner, **не виробниче середовище**.
-- Без реальних бізнес-витрат Pulumi budget — synthetic fixture;
-  license та K8s policy наразі вузькі навчальні перевірки.
+- Без реальних бізнес-витрат Pulumi budget — synthetic fixture; G19 license та G20 Trivy тепер справжні окремі сканери зі звітами, проте не повні SPDX/OPA policy packs.
 - Стенд підтримує 18 зареєстрованих пар RED/GREEN (G03/G04 після
   `quality:bootstrap`), а не 32/32 повних
   production-equivalent gates. [Матриця стану](CHECKS_MATRIX.md).
+
+## Додаткові 4 хвилини: real security та deep nightly
+
+1. **G16/G19:** [реальний Gitleaks/ліцензії RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) → [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276). Обидва входять у required reusable workflow.
+2. **G20:** [Trivy Kubernetes RED — 5 HIGH/CRITICAL](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118) → [GREEN на справжніх маніфестах](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059).
+3. **Property fuzz:** [реальний TypeError RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291) → [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021). Поясни, навіщо BigInt використано як oracle для обчислення ціни в центах.
+4. **P3:** [повний нічний прогін](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280): 88 521 create/read циклів за 20 секунд; 181 470 HTTP, p95 1.54 мс, 0 помилок; одночасно контрольний mutant KILLED. Це не production load/DAST.
+
+Операційні кроки для ручного завершення G28/G32, AWS OIDC і чесні межі: [docs/OPERATOR_HANDOFF.md](docs/OPERATOR_HANDOFF.md).

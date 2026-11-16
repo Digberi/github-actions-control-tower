@@ -15,6 +15,8 @@ unsafe totals outside `Number.MAX_SAFE_INTEGER`.
 
 `.github/workflows/nightly-deep.yml` runs every Monday at 03:17 UTC,
 can be dispatched manually, and runs once on changes to its own code path.
+[Verified full nightly GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280): real 20-second soak processed 88,521 create/read cycles and 181,470 HTTP requests, p95 1.54ms, with zero failures; the single controlled arithmetic mutant was killed. JSON artifacts were uploaded.
+
 Jobs are independent of prior PR conclusions:
 
 1. Existing dependency audit, coverage information and local performance.
