@@ -69,9 +69,9 @@ IAM trust policies automatically**.
 
 ## D. Narrow/optional gates — honest limitation ledger
 
-- G03: real ESLint+Prettier scoped to source/fixture, not whole repository.
-- G04: real strict TypeScript for DTO; backend is JavaScript.
-- G11: real independent HTTP consumer contract, **not Pact**.
+- G03: real ESLint+Prettier cover all production `src/*.mjs` and a style fixture; scripts/tests remain outside scope.
+- G04: strict TypeScript `checkJs` covers all production `src/*.mjs` with JSDoc plus a typed DTO fixture; backend remains JavaScript.
+- G11: genuine Pact V4 consumer-generated contract verified through HTTP against the real provider; no Pact Broker or `can-i-deploy`.
 - G12: optional — this sample API does not emit messages to Kafka/RabbitMQ.
 - G13–G15: working migration/import/cycle checks, but not all
   dependency-cruiser/DB migration tools in the target design.

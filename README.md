@@ -40,15 +40,16 @@ npm run check:sbom
 
 ### G03/G04/G07/G09 — розширення для перевірки якості
 
-Нові окремі workflows додають реальні **ESLint + Prettier**, **tsc strict DTO**,
+Нові окремі workflows додають реальні **ESLint + Prettier**, **tsc strict checkJs у production source**,
 **Node/OS matrix** (Ubuntu 22/24, macOS 22, Windows 22) та E2E RED.
-Інструменти G03/G04 встановлюються **локально у відокремлений каталог**,
-не змінюючи application `package-lock.json`:
+Інструменти G03/G04 закріплено точними версіями в `package-lock.json`:
 
 ~~~bash
 npm run quality:bootstrap
 npm run check:style
+npm run check:types
 npm run check:types:demo
+npm run test:pact:green
 npm run check:platform
 npm run demo:case -- --id G03 --mode red --target local
 npm run demo:case -- --id G04 --mode red --target local
@@ -56,8 +57,10 @@ npm run demo:case -- --id G07 --mode red --target local
 npm run demo:case -- --id G09 --mode red --target local
 ~~~
 
-G03 перевіряє реальний domain module та вузький style fixture, G04 — strict
-TypeScript DTO, **не весь JavaScript API**. У G07 локальний RED використовує
+G03 перевіряє **всі `src/*.mjs`** та окрему style fixture; G04 — strict
+TypeScript DTO **і весь production JavaScript API** через `checkJs` + JSDoc.
+[Відтворення реального source RED/GREEN](docs/G03_G04_SOURCE.md), [Pact V4](docs/G11_PACT.md).
+У G07 локальний RED використовує
 чітко позначену Windows-path emulation, а RED GitHub workflow перевіряє
 **справжній Windows runner**. Не називати локальну емуляцію виконанням Windows.
 
@@ -97,7 +100,7 @@ npm run demo:cleanup -- --scope lecture --dry-run
 `exit 1`, робить job червоною та зберігає evidence як artifact.
 Для вибору Gxx відкрий **Actions → Controlled Red / Green → Run workflow**.
 Фікстури OIDC — локальні RS256 підписи, **не** справжні GitHub JWT або AWS STS.
-Із 18 пар дві (G03/G04) вимагають окремого `quality:bootstrap`; решта
+Із 18 пар G03/G04 потребують встановлених devDependencies (`npm ci`), решта
 16 виконуються без цього toolchain. Для готових результатів G03/G04/G07/G09
 доступний `--target prepared` з реально перевіреними RED/GREEN run URLs.
 
@@ -145,7 +148,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 | `10 · Real OpenAPI Compatibility` | PR, manual green/red | oasdiff перевіряє spec на breaking changes |
 | `11 · YAML and Dockerfile Linters` | PR, manual | реальний yamllint + Hadolint; actionlint містить ShellCheck |
 | `12 · Real OS and Node Compatibility Matrix` | PR, manual green/red | Ubuntu Node 22/24, macOS 22, Windows 22; керований Windows-only RED |
-| `13 · Real ESLint Prettier and TypeScript` | PR, manual G03/G04 green/red | ізольовано встановлені реальні інструменти й machine-readable reports |
+| `13 · Real ESLint Prettier and TypeScript` | PR, manual G03/G04 green/red | lockfile-прибиті інструменти перевіряють `src/` + окремі fixtures; machine-readable reports |
 | `14 · Real Secret and License Security Gates` | reusable PR, manual red/green | Gitleaks real source scan + actual installed npm dependency licenses; RED/GREEN JSON evidence |
 | `15 · Trivy Kubernetes IaC Policy` | reusable PR, manual red/green | actual Trivy config on real infra/k8s; 5 HIGH/CRITICAL red fixture; green source scan |
 
@@ -184,7 +187,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 Прочитай [AGENTS.md](AGENTS.md), потім
 [IMPLEMENTATION_BRIEF.md](IMPLEMENTATION_BRIEF.md).
 Працюй інкрементально; спочатку стабільні green/red прогонки, далі
-Pact/SAST/attestation/image scan/approval. Не підміняй
+Pact Broker/can-i-deploy, розширене SAST/image remediation/approval. Не підміняй
 компоненти макетами з фальшивим SUCCESS.
 
 ## Структура

@@ -25,11 +25,16 @@
 артефакти завантажені навіть після failure. Локальна емуляція Windows
 у CLI позначена окремо й не є заміною цього run.
 
-Для style/type gate відкрий [G03/G04 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179),
+Для style/type gate відкрий [G03/G04 source GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213138),
 потім [G03 RED (ESLint/Prettier)](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276)
-і [G04 RED (TS2322)](https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680).
+і [G04 RED у реальному `src/domain.mjs`](https://github.com/Digberi/github-actions-control-tower/actions/runs/44069857400).
 Це справжні tool exits `1`, а `upload-artifact` працює на `always()`.
-Важлива межа: G04 компілює вузьку TypeScript DTO fixture; backend лишається JS.
+Важлива межа: G04 робить `strict checkJs` у всьому production `src/*.mjs` плюс DTO fixture; backend лишається JS.
+
+Для Pact покажи [G11 V4 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/44067822214)
+→ [G11 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44068138435):
+спочатку справжній consumer викликає Pact mock, потім verifier перевіряє провайдера,
+який навмисно викинув `orderId` із HTTP response.
 
 ## Основний сценарій (12–18 хв)
 
@@ -99,7 +104,7 @@ npm run demo:cleanup -- --scope lecture --dry-run
 - Kind — тимчасовий Kubernetes на GitHub runner, **не виробниче середовище**.
 - Без реальних бізнес-витрат Pulumi budget — synthetic fixture; G19 license та G20 Trivy тепер справжні окремі сканери зі звітами, проте не повні SPDX/OPA policy packs.
 - Стенд підтримує 18 зареєстрованих пар RED/GREEN (G03/G04 після
-  `quality:bootstrap`), а не 32/32 повних
+  `npm ci`), а не 32/32 повних
   production-equivalent gates. [Матриця стану](CHECKS_MATRIX.md).
 
 ## Додаткові 4 хвилини: real security та deep nightly

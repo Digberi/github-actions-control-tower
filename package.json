@@ -24,7 +24,7 @@
     "test:pact:red": "node scripts/pact-contract.mjs red",
     "test:e2e": "node --test tests/e2e.test.mjs",
     "check:platform": "node scripts/platform-check.mjs",
-    "quality:bootstrap": "npm install --prefix quality/tooling --no-save --package-lock=false --ignore-scripts --no-audit --no-fund eslint@9.39.5 prettier@3.6.2 typescript@5.9.3",
+    "quality:bootstrap": "npm ci --ignore-scripts",
     "check:style": "node scripts/quality-check.mjs G03 green",
     "check:types:demo": "node scripts/quality-check.mjs G04 green",
     "test": "node --test tests/*.test.mjs",

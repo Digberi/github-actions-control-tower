@@ -74,6 +74,10 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179">ESLint + tsc: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276">G03 ESLint: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680">G04 TypeScript: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44069857400">G04 source: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213086">G03/G04 + Required: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44067822214">Pact V4: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44068138435">Pact V4: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799">OS matrix: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867">Windows matrix: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43955060328">G09 E2E: RED</a>
@@ -255,7 +259,7 @@
     };
     Object.assign(scenarios,{
       G03:{fail:"code",text:"G03 RED: справжні ESLint eqeqeq/semi + Prettier --check повернули exit 1; GitHub зберіг JSON artifact."},
-      G04:{fail:"code",text:"G04 RED: справжній TypeScript tsc --noEmit зупинився на TS2322 (string замість number) у DTO fixture. Це не typecheck всього JS backend."},
+      G04:{fail:"code",text:"G04 RED: реальний production src/domain.mjs з помилкою number ← string зупинив strict tsc --checkJs (TS2322). Required Gate теж відхилив PR; GREEN перевіряє всі src/*.mjs."},
       G05:{fail:"code",text:"G05 unit RED: ціновий інваріант не виконується, required блокує merge."},
       G07:{fail:"code",text:"G07 RED: POSIX-only separator зламався ТІЛЬКИ на справжньому Windows runner. Ubuntu Node 22/24 і macOS 22 — GREEN; fail-fast=false."},
       G08:{fail:"tests",text:"G08 integration RED: HTTP створення order повернуло неправильний status."},
@@ -330,9 +334,9 @@
 
     </section>
     <section class="implementation" aria-label="Рівні реалізації">
-      <article><h3>18 пар RED/GREEN</h3><p>Контролер має 36 зареєстрованих варіантів; G03/G04 локально потребують quality:bootstrap. Реальні GitHub RED/GREEN job links і JSON artifacts.</p></article>
+      <article><h3>18 пар RED/GREEN</h3><p>Контролер має 36 зареєстрованих варіантів; G03/G04 потребують npm ci для lockfile-pinned tools. Реальні GitHub RED/GREEN job links і JSON artifacts.</p></article>
       <article><h3>Паралельні GitHub Jobs</h3><p>Ubuntu/macOS/Windows × Node 22/24, реальні ESLint/Prettier/tsc, PostgreSQL, consumer, actionlint, coverage, CycloneDX/audit, CodeQL, k6, Docker і Required.</p></article>
-      <article><h3>Deep/Release</h3><p>GHCR, Sigstore attestation + verification, kind rollback. Pact, real AWS OIDC, approval і cloud production ще не виконувались; 32/32 не заявлено.</p></article>
+      <article><h3>Deep/Release</h3><p>GHCR, Sigstore attestation + verification, kind rollback, справжній Pact V4 consumer/provider RED/GREEN. Real AWS OIDC, prod approval і cloud production ще не виконувались; 32/32 не заявлено.</p></article>
     </section>
     <footer class="foot">Demo mode не змінює production і не використовує cloud secrets. Симуляція відображає лише логіку проходження гейтів.</footer>
   </main>
