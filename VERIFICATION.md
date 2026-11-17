@@ -7,6 +7,8 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| G14/G15: real source imported HTTP app from domain; dependency-cruiser reported prohibited layer edge **and** a circular import; required job failed, graph artifact uploaded | 🔴 EXPECTED RED, 2 real rule violations | [44071612021](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071612021) |
+| G14/G15: dependency-cruiser parsed 4 production modules, 4 edges, no policy violations; Required Gate green | ✅ GREEN + graph JSON artifact | [44071802736](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071802736) |
 | G04: injected `string` assigned to `number` inside real `src/domain.mjs`, not isolated DTO; Required Gate blocked | 🔴 EXPECTED RED, TS2322 + artifact | [44069857400](https://github.com/Digberi/github-actions-control-tower/actions/runs/44069857400) |
 | G19: transitive ESLint dependency `argparse` declared `Python-2.0` not present in allowlist | 🔴 REAL POLICY RED, Required Gate blocked | [44069988992](https://github.com/Digberi/github-actions-control-tower/actions/runs/44069988992) |
 | G03/G04: all production `src/*.mjs` linted/formatted and strictly checked with TypeScript checkJs | ✅ GREEN, source and DTO artifacts | [44070213138](https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213138) |

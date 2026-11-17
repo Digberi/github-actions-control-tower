@@ -43,7 +43,14 @@ const evidence = {
   scannerAdvisedExitCode: advisedExitCode,
   modules: graph.summary?.totalCruised ?? null,
   dependencies: graph.summary?.totalDependenciesCruised ?? null,
-  violations: violations.map(v => ({ rule: v.rule?.name, severity: v.rule?.severity, from: v.from, to: v.to, circular: v.circular }))
+  violations: violations.map(v => ({
+    rule: v.rule?.name,
+    severity: v.rule?.severity,
+    type: v.type,
+    from: v.from,
+    to: v.to,
+    cycle: v.cycle?.map(edge => edge.name) ?? []
+  }))
 };
 mkdirSync(resolve(root, "reports"), { recursive: true });
 writeFileSync(resolve(root, `reports/depcruise-${mode}.json`), JSON.stringify(graph, null, 2) + "\n");

@@ -78,6 +78,8 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213086">G03/G04 + Required: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44067822214">Pact V4: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44068138435">Pact V4: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44071612021">G14/G15 depgraph: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44071802736">G14/G15 depgraph: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953382799">OS matrix: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954175867">Windows matrix: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43955060328">G09 E2E: RED</a>
@@ -267,8 +269,8 @@
       G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний RED run і додано oasdiff для OpenAPI schema."},
       G11:{fail:"tests",text:"G11 Pact V4 RED: provider вилучив orderId. Pact consumer-generated contract відхиляє несумісний HTTP response; звір GitHub artifact із реальним verifier."},
       G13:{fail:"tests",text:"G13 migration RED: DROP COLUMN не проходить expand-only policy, стару версію треба зберегти."},
-      G14:{fail:"tests",text:"G14 architecture boundary RED: domain залежить від HTTP transport; перевірка зупиняє PR."},
-      G15:{fail:"tests",text:"G15 architecture RED: у граф import додано цикл, gate завершується exit 1."},
+      G14:{fail:"tests",text:"G14 dependency-cruiser RED: реальний src/domain імпортує HTTP app; парсер графа фіксує boundary violation, Required падає, JSON artifact зберігається."},
+      G15:{fail:"tests",text:"G15 dependency-cruiser RED: реальний цикл app → domain → app. CLI повернув nonzero exit, Required заблокував merge. GREEN підтверджено в GitHub."},
       G16:{fail:"security",text:"G16 реально перевірено Gitleaks v8.30.1: generated fake PAT → exit 1, redacted JSON; green сканує справжні файли репозиторію. Жодного реального секрету у fixture немає."},
       G19:{fail:"security",text:"G19 перевіряє ліцензії встановлених npm-залежностей; RED додає один тимчасовий GPL запис. Це не верифікація повних текстів SPDX ліцензій."},
       G20:{fail:"security",text:"G20 реально перевірено Trivy config: тимчасовий privileged K8s Deployment має 5 HIGH/CRITICAL → RED (exit 1); справжні infra/k8s/*.json проходять GREEN. Артефакти є в GitHub Actions."},
