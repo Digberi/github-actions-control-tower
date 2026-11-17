@@ -20,6 +20,8 @@
 
 **[Відкрити опубліковану інтерактивну демонстрацію →](https://digberi.github.io/github-actions-control-tower/)**
 
+Остання перевірка всього trusted release на `main` (17.11.2026): [GHCR + Sigstore + ephemeral kind rollout/rollback GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082).
+
 - Вибери один із шести сюжетів або один із 18 окремих gate-сценаріїв (включно з G03/G04/G07/G09).
 - Клікни на етап, щоб подивитися список гейтів.
 - Схема показує **цільову архітектуру**, не стверджує, що гейт уже запущено.

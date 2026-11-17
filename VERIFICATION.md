@@ -7,6 +7,8 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| Latest `main` release: GHCR immutable image, Sigstore attestation and independent verification, local staging smoke, real kind deployment + broken rollout/undo | ✅ GREEN complete trusted release | [44072283082](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082) |
+| Updated HTML diagram with Pact, source lint/strict checkJs, dependency-cruiser RED/GREEN evidence | ✅ GitHub Pages published | [44072283073](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283073) |
 | G14/G15: real source imported HTTP app from domain; dependency-cruiser reported prohibited layer edge **and** a circular import; required job failed, graph artifact uploaded | 🔴 EXPECTED RED, 2 real rule violations | [44071612021](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071612021) |
 | G14/G15: dependency-cruiser parsed 4 production modules, 4 edges, no policy violations; Required Gate green | ✅ GREEN + graph JSON artifact | [44071802736](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071802736) |
 | G04: injected `string` assigned to `number` inside real `src/domain.mjs`, not isolated DTO; Required Gate blocked | 🔴 EXPECTED RED, TS2322 + artifact | [44069857400](https://github.com/Digberi/github-actions-control-tower/actions/runs/44069857400) |

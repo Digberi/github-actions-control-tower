@@ -89,7 +89,21 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/IMPLEMENTATION_BRIEF.md">ТЗ для агента</a>
       </nav>
     </header>
-    <div class="notice" role="note"><strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong> Реальні GitHub Actions перевірили actionlint, Node 22/24 на Ubuntu/macOS/Windows, ESLint, Prettier, strict DTO TypeScript, coverage, PostgreSQL, SCA/SBOM, CodeQL, k6, GHCR, oasdiff та політики. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938">Kind rollout + 25 HTTP samples + rollback успішні</a>; <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy реально заблокував HIGH/CRITICAL CVEs</a>. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291">G05 property fuzz знайшов справжнє переповнення cents</a>, <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021">GREEN після fix</a>. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280">Нічний soak: 181 470 HTTP, 0 помилок, p95 1.54 мс; контрольний мутант виявлений</a>. TypeScript охоплює тільки DTO fixture; cost/OIDC лишаються synthetic. <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427">G16/G19: справжні Gitleaks та npm license RED</a> і <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276">GREEN</a> (G19 RED має лише доданий тестовий GPL запис); <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118">G20 Trivy IaC RED (5 HIGH/CRITICAL)</a> / <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059">GREEN</a>; статус G01–G32 дивись у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.</div>
+    <div class="notice" role="note">
+      <strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong>
+      Справжні GitHub Actions перевіряють actionlint, матрицю Node/OS, ESLint/Prettier у всіх production <code>src/*.mjs</code>, strict TypeScript checkJs + DTO, PostgreSQL, coverage, Pact V4, dependency-cruiser, CodeQL, SCA/SBOM, k6, GHCR та політики.
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082">Найновіший trusted release: GHCR + attestation + kind staging/rollback GREEN</a>;
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">G21 Trivy виявив CVEs і заблокував старий image</a> — це не GREEN.
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291">G05 property fuzz упіймав переповнення</a>,
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021">GREEN після fix</a>;
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280">нічний soak: 181 470 HTTP, 0 помилок; mutant killed</a>.
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427">G16/G19 synthetic secret + GPL RED</a>,
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44069988992">G19 real transitive license RED</a>,
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213086">GREEN після зміни політики</a>.
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118">G20 Trivy IaC RED</a> /
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059">GREEN</a>.
+      Реальний AWS OIDC/STS та cost preview досі не налаштовані; весь стан G01–G32 — у <a href="https://github.com/Digberi/github-actions-control-tower/blob/main/CHECKS_MATRIX.md">матриці</a>.
+    </div>
     <section class="panel" aria-label="Інтерактивний CI/CD pipeline">
 <div id="cicd-tower-v1" class="ct-root">
   <style>

@@ -1,7 +1,7 @@
 # G01–G32 — reality check
 
 This matrix distinguishes **local implementation** from **verified remote execution**.
-Implementation PRs #1–#13 were merged on 2026-11-16; #11 proved G16/G19 RED/GREEN, #12 proved Trivy G20 RED/GREEN, #13 proved property-based safety RED/GREEN. Real runner
+Implementation PRs #1–#17 were merged by 2026-11-17; #15 proved Pact V4, #16 expanded G03/G04 to production source, and #17 proved real dependency-cruiser G14/G15 RED/GREEN. Earlier #11 proved G16/G19, #12 Trivy G20, and #13 property-based safety. Real runner
 evidence includes [PR #8](https://github.com/Digberi/github-actions-control-tower/pull/8),
 [Sigstore + kind release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325),
 [real linter](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391)
@@ -48,6 +48,8 @@ GitHub settings, `OPTIONAL` = only needed when representative events exist.
 | G32 | Aggregate required checks | PARTIAL + REMOTE | [Required PR Gate](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968155397) aggregates all core checks, G16/G19/G20 reusable gates, numeric property fuzz and 3s soak; GitHub branch ruleset **not** configured ([owner setup](docs/OPERATOR_HANDOFF.md)). |
 
 Extended nightly [property fuzz + killed mutant + true 20s soak](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) is GREEN with JSON artifacts; no production-scale testing is claimed.
+
+Latest `main` trusted [build, Sigstore attestation, kind rollout and rollback](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082) completed GREEN on 2026-11-17; [GitHub Pages](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283073) published the updated diagram.
 
 The diagram in [docs/index.html](docs/index.html) intentionally shows the
 complete **target** from the implementation brief. A green visualization
