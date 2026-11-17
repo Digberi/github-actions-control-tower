@@ -11,15 +11,18 @@ if (!["G03", "G04"].includes(gate) || !["green", "red"].includes(mode)) {
   process.exit(2);
 }
 
-const bin = process.env.QUALITY_TOOL_BIN ?? path.join(root, "quality", "tooling", "node_modules", ".bin");
+const bin = process.env.QUALITY_TOOL_BIN ?? path.join(root, "node_modules", ".bin");
 const executable = process.platform === "win32" ? ".cmd" : "";
 const target = mode === "red" ? "red" : "green";
 const commands = gate === "G03"
   ? [
-      ["eslint", ["src/domain.mjs", "quality/style/" + target + ".mjs"]],
-      ["prettier", ["--check", "quality/style/" + target + ".mjs"]]
+      ["eslint", ["src", "quality/style/" + target + ".mjs"]],
+      ["prettier", ["--check", "src", "quality/style/" + target + ".mjs"]]
     ]
-  : [["tsc", ["--noEmit", "--project", "quality/types/tsconfig." + target + ".json"]]];
+  : [
+      ["tsc", ["--noEmit", "--project", "quality/types/tsconfig.src.json"]],
+      ["tsc", ["--noEmit", "--project", "quality/types/tsconfig." + target + ".json"]]
+    ];
 
 let failed = false;
 let missingTool = false;
@@ -52,7 +55,7 @@ const evidence = {
   workflowRunUrl: process.env.GITHUB_RUN_ID
     ? "https://github.com/" + process.env.GITHUB_REPOSITORY + "/actions/runs/" + process.env.GITHUB_RUN_ID
     : null,
-  note: "Narrow real ESLint/Prettier or tsc fixture, not a repo-wide quality guarantee."
+  note: "Strict application src/*.mjs checks plus isolated RED/GREEN fixtures; scripts and tests are outside this gate."
 };
 mkdirSync(path.join(root, "reports"), { recursive: true });
 const report = "reports/quality-" + gate + "-" + mode + ".json";

@@ -1,12 +1,16 @@
 # Перевірені GitHub Actions — evidence ledger
 
-Станом на **16.11.2026**. Нижче — справжні публічні GitHub workflow runs,
+Станом на **17.11.2026**. Нижче — справжні публічні GitHub workflow runs,
 не намальовані позначки, не локальні симуляції. Для кожної демонстрації
 червоний статус може бути **очікуваним** — дивись причину та JSON/Markdown
 артефакти, а не лише кольорову іконку.
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| G04: injected `string` assigned to `number` inside real `src/domain.mjs`, not isolated DTO; Required Gate blocked | 🔴 EXPECTED RED, TS2322 + artifact | [44069857400](https://github.com/Digberi/github-actions-control-tower/actions/runs/44069857400) |
+| G19: transitive ESLint dependency `argparse` declared `Python-2.0` not present in allowlist | 🔴 REAL POLICY RED, Required Gate blocked | [44069988992](https://github.com/Digberi/github-actions-control-tower/actions/runs/44069988992) |
+| G03/G04: all production `src/*.mjs` linted/formatted and strictly checked with TypeScript checkJs | ✅ GREEN, source and DTO artifacts | [44070213138](https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213138) |
+| G19: OSI-approved Python-2.0 allowed explicitly; installed dependency policy and Required green | ✅ GREEN | [44070213086](https://github.com/Digberi/github-actions-control-tower/actions/runs/44070213086) |
 | G11: generated Pact V4 consumer contract → real provider verifier; provider drops `orderId`, Pact reports missing key, artifact preserved | 🔴 EXPECTED RED, required consumer job fails | [44067822214](https://github.com/Digberi/github-actions-control-tower/actions/runs/44067822214) |
 | G11: Pact V4 mock and real Orders API provider verification restore compatible response | ✅ GREEN Pact job, JSON artifact | [44067963983](https://github.com/Digberi/github-actions-control-tower/actions/runs/44067963983) |
 | P3 nightly: actual 20s six-client HTTP soak, 88,521 order create/read cycles, 181,470 HTTP requests, 0 errors, p95 1.54ms | ✅ GREEN, JSON artifact | [43968370280](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) |
@@ -96,7 +100,7 @@
 - Deployment — **staging-like на ephemeral kind**, не AWS/production.
   Один перевірений digest проходить kind; actual production promotion
   із human approval немає.
-- Full-repository ESLint/TypeScript, Pact Broker / can-i-deploy, history-wide Gitleaks, OPA, реальний Pulumi cost, cloud STS,
+- Tooling scripts/tests-wide ESLint/TypeScript, Pact Broker / can-i-deploy, history-wide Gitleaks, OPA, реальний Pulumi cost, cloud STS,
   DAST/fuzzing/mutation та частина G01–G32 — **не реалізовані повністю**.
   Деталі — у [матриці гейтів](CHECKS_MATRIX.md).
 - HTTP visualization — інтерактивна **модель** для пояснення причин/наслідків,
