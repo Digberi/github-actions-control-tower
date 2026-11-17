@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { createApp } from "./app.mjs";
 
 /** @typedef {{ quantity: number, priceCents: number }} OrderItem */
 /** @typedef {{ orderId: string, status: string, totalCents: number }} Order */
