@@ -73,8 +73,8 @@ IAM trust policies automatically**.
 - G04: strict TypeScript `checkJs` covers all production `src/*.mjs` with JSDoc plus a typed DTO fixture; backend remains JavaScript.
 - G11: genuine Pact V4 consumer-generated contract verified through HTTP against the real provider; no Pact Broker or `can-i-deploy`.
 - G12: optional — this sample API does not emit messages to Kafka/RabbitMQ.
-- G13–G15: working migration/import/cycle checks, but not all
-  dependency-cruiser/DB migration tools in the target design.
+- G13: a narrow expand-only SQL migration validator, not a complete migration analyzer.
+- G14/G15: actual dependency-cruiser 18 validates production import boundaries and cycles in a blocking job; does not inspect runtime dependency edges.
 - G16: actual Gitleaks scans checked-out files; full git-history scanning
   remains optional.
 - G19: actual installed npm dependency license metadata, strict allowlist;

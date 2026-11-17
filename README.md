@@ -33,6 +33,7 @@
 ~~~bash
 npm ci
 npm run check
+npm run check:depgraph
 npm run check:heavy
 npm run check:coverage
 npm run check:sbom
@@ -50,6 +51,7 @@ npm run check:style
 npm run check:types
 npm run check:types:demo
 npm run test:pact:green
+npm run demo:depgraph:red
 npm run check:platform
 npm run demo:case -- --id G03 --mode red --target local
 npm run demo:case -- --id G04 --mode red --target local
@@ -180,6 +182,7 @@ GitHub Pages **увімкнено й перевірено в браузері**:
 - `staging-kind` розгортає **тимчасовий kind на runner**, не постійний cloud staging.
 - G30/G31 — actual bad rollout + undo у kind, не production rollback.
 - G19 сканує фактично встановлені npm-ліцензії, G20 використовує справжній Trivy config. Старі fixtures збережено окремо. G26 cost preview досі synthetic; OPA/Rego не інтегровано.
+- G14/G15 — незалежний Required gate із реальним dependency-cruiser та JSON-графом; [покрокове RED/GREEN](docs/G14_G15_DEPGRAPH.md).
 - Візуалізація всіх 32 гейтів — архітектурна мета, а не доказ виконання.
 
 ## Для coding-агента

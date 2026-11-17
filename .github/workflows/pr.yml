@@ -44,6 +44,32 @@ jobs:
       - name: G20 · Validate actual K8s deployment security policy
         run: CHECK_REAL_K8S_MANIFEST=true node scripts/heavy-gates.mjs G20 green
 
+  depgraph:
+    name: "G14/G15 · dependency-cruiser boundaries and cycles"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Real source graph with policy and cycle rules
+        run: npm run check:depgraph
+      - name: Upload dependency graph and rule verdicts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: g14-g15-dependency-cruiser
+          path: |
+            reports/depcruise-green.json
+            reports/g14-g15-green.json
+          if-no-files-found: warn
+          retention-days: 7
+
   policy:
     name: "G19/G20/G24/G26/G27 · ${{ matrix.gate }}"
     runs-on: ubuntu-latest
@@ -287,12 +313,13 @@ jobs:
   required:
     name: "Required · PR Gate"
     if: always()
-    needs: [actionlint, static, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security, iac, property]
+    needs: [actionlint, static, depgraph, policy, supply_chain, postgres, consumer, unit, coverage, integration, e2e, performance, image, security, iac, property]
     runs-on: ubuntu-latest
     steps:
       - name: Collect outcomes and enforce required checks
         env:
           STATIC: ${{ needs.static.result }}
+          DEPGRAPH: ${{ needs.depgraph.result }}
           ACTIONLINT: ${{ needs.actionlint.result }}
           POLICY: ${{ needs.policy.result }}
           SUPPLY_CHAIN: ${{ needs.supply_chain.result }}
@@ -311,7 +338,7 @@ jobs:
           echo "## PR Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           printf '| Job | Result |\n|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
           failed=0
-          for job in ACTIONLINT STATIC POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY IAC PROPERTY; do
+          for job in ACTIONLINT STATIC DEPGRAPH POLICY SUPPLY_CHAIN POSTGRES CONSUMER UNIT COVERAGE INTEGRATION E2E PERFORMANCE IMAGE SECURITY IAC PROPERTY; do
             result="${!job}"
             printf '| %s | %s |\n' "$job" "$result" >> "$GITHUB_STEP_SUMMARY"
             if [ "$result" != success ]; then

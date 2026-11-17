@@ -17,8 +17,10 @@ if (!existsSync(modulesDir)) {
 
 const allowed = new Set([
   // Python-2.0 is an OSI-approved permissive license (argparse via ESLint),
-  // see https://opensource.org/license/Python-2.0 . GPL remains forbidden.
-  "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "0BSD", "CC0-1.0", "Python-2.0"
+  // see https://opensource.org/license/Python-2.0 . BlueOak-1.0.0 is also
+  // OSI-approved (dependency-cruiser -> graceful-fs):
+  // https://opensource.org/license/BlueOak-1.0.0 . GPL remains forbidden.
+  "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "0BSD", "CC0-1.0", "Python-2.0", "BlueOak-1.0.0"
 ]);
 
 function packageDirectories(directory) {

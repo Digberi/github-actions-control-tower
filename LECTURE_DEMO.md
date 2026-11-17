@@ -36,6 +36,12 @@
 спочатку справжній consumer викликає Pact mock, потім verifier перевіряє провайдера,
 який навмисно викинув `orderId` із HTTP response.
 
+Для архітектури відкрий [G14/G15 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071612021)
+→ [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071802736).
+Dependency-cruiser незалежно знаходить порушення шару domain→HTTP app та реальний цикл `app→domain→app`.
+Обидва правила мають severity `error`, nonzero CLI exit та JSON-граф у artifact;
+Required також блокує злиття. [Локальне відтворення](docs/G14_G15_DEPGRAPH.md).
+
 ## Основний сценарій (12–18 хв)
 
 | Час | Що демонструю | Що говорю | Де дивлюся |
