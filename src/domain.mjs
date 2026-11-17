@@ -1,8 +1,5 @@
 import { randomUUID } from "node:crypto";
 
-/** @type {number} */
-const lectureTypeViolation = "not-a-number";
-
 /** @typedef {{ quantity: number, priceCents: number }} OrderItem */
 /** @typedef {{ orderId: string, status: string, totalCents: number }} Order */
 /**
