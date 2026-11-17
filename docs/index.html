@@ -161,7 +161,7 @@
         <option value="G08">G08 · HTTP integration RED</option>
         <option value="G09">G09 · API E2E 404 RED</option>
         <option value="G10">G10 · API contract RED</option>
-        <option value="G11">G11 · independent consumer RED</option>
+        <option value="G11">G11 · Pact V4 contract RED</option>
         <option value="G13">G13 · destructive migration RED</option>
         <option value="G14">G14 · architecture boundary RED</option>
         <option value="G15">G15 · architecture cycle RED</option>
@@ -261,7 +261,7 @@
       G08:{fail:"tests",text:"G08 integration RED: HTTP створення order повернуло неправильний status."},
       G09:{fail:"tests",text:"G09 E2E RED: API для відсутнього order повертає 200 замість 404, справжній GitHub test assertion завершується exit 1. Пара RED/GREEN і артефакти перевірені."},
       G10:{fail:"tests",text:"G10 contract RED: відсутній orderId — є реальний RED run і додано oasdiff для OpenAPI schema."},
-      G11:{fail:"tests",text:"G11 independent consumer RED: зламано очікування клієнта, хоча unit producer green."},
+      G11:{fail:"tests",text:"G11 Pact V4 RED: provider вилучив orderId. Pact consumer-generated contract відхиляє несумісний HTTP response; звір GitHub artifact із реальним verifier."},
       G13:{fail:"tests",text:"G13 migration RED: DROP COLUMN не проходить expand-only policy, стару версію треба зберегти."},
       G14:{fail:"tests",text:"G14 architecture boundary RED: domain залежить від HTTP transport; перевірка зупиняє PR."},
       G15:{fail:"tests",text:"G15 architecture RED: у граф import додано цикл, gate завершується exit 1."},
