@@ -1,8 +1,7 @@
-// Narrow, dependency-free ESLint flat configuration for the lecture fixture
-// and the business-domain module. No application source is rewritten.
+// Real application-source lint plus an isolated intentionally broken fixture.
 export default [
   {
-    files: ["quality/style/*.mjs", "src/domain.mjs"],
+    files: ["quality/style/*.mjs", "src/**/*.mjs"],
     rules: {
       eqeqeq: ["error", "always"],
       curly: ["error", "all"],

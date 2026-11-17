@@ -7,13 +7,21 @@ import { readFileSync } from "node:fs";
  * PostgreSQL-backed repository. Real transactions, real uniqueness/locking,
  * real cross-request idempotency; no fake DB and no cloud resources.
  */
+/** @param {string} connectionString */
 export function makePostgresOrderStore(connectionString) {
-  if (!connectionString) throw new Error("DATABASE_URL required");
-  const pool = new pg.Pool({ connectionString, max: 5, connectionTimeoutMillis: 3000 });
+  if (!connectionString) {
+    throw new Error("DATABASE_URL required");
+  }
+  const pool = new pg.Pool({
+    connectionString,
+    max: 5,
+    connectionTimeoutMillis: 3000,
+  });
   const store = {
     async migrate() {
       const migration = readFileSync(
-        new URL("../migrations/001_orders.sql", import.meta.url), "utf8"
+        new URL("../migrations/001_orders.sql", import.meta.url),
+        "utf8",
       );
       await pool.query(migration);
     },
@@ -25,9 +33,12 @@ export function makePostgresOrderStore(connectionString) {
         return false;
       }
     },
+    /** @param {import('./domain.mjs').OrderItem[]} items @param {string} [key] */
     async create(items, key) {
       const totalCents = calculateTotal(items);
-      const requestHash = createHash("sha256").update(JSON.stringify(items)).digest("hex");
+      const requestHash = createHash("sha256")
+        .update(JSON.stringify(items))
+        .digest("hex");
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
@@ -37,27 +48,30 @@ export function makePostgresOrderStore(connectionString) {
            VALUES ($1, $2, $3, $4)
            ON CONFLICT (idempotency_key) DO NOTHING
            RETURNING id, status, total_cents, request_hash`,
-          [id, key ?? null, requestHash, totalCents]
+          [id, key ?? null, requestHash, totalCents],
         );
         let row = inserted.rows[0];
         if (!row && key !== undefined) {
           const found = await client.query(
             "SELECT id, status, total_cents, request_hash FROM demo_orders WHERE idempotency_key = $1",
-            [key]
+            [key],
           );
           row = found.rows[0];
           if (row?.request_hash !== requestHash) {
-            const error = new Error("idempotency_key_conflict");
-            error.statusCode = 409;
+            const error = Object.assign(new Error("idempotency_key_conflict"), {
+              statusCode: 409,
+            });
             throw error;
           }
         }
-        if (!row) throw new Error("database_insert_failed");
+        if (!row) {
+          throw new Error("database_insert_failed");
+        }
         await client.query("COMMIT");
         return {
           orderId: row.id,
           status: row.status,
-          totalCents: Number(row.total_cents)
+          totalCents: Number(row.total_cents),
         };
       } catch (error) {
         await client.query("ROLLBACK");
@@ -66,17 +80,24 @@ export function makePostgresOrderStore(connectionString) {
         client.release();
       }
     },
+    /** @param {string} id */
     async get(id) {
       const found = await pool.query(
         "SELECT id, status, total_cents FROM demo_orders WHERE id = $1",
-        [id]
+        [id],
       );
       const row = found.rows[0];
-      return row ? { orderId: row.id, status: row.status, totalCents: Number(row.total_cents) } : null;
+      return row
+        ? {
+            orderId: row.id,
+            status: row.status,
+            totalCents: Number(row.total_cents),
+          }
+        : null;
     },
     async close() {
       await pool.end();
-    }
+    },
   };
   return store;
 }

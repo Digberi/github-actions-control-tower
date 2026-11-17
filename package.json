@@ -44,7 +44,7 @@
     "demo:cleanup": "node scripts/demo-controller.mjs cleanup",
     "check:heavy": "node scripts/heavy-gates.mjs G13 green && node scripts/heavy-gates.mjs G19 green && node scripts/heavy-gates.mjs G20 green && node scripts/heavy-gates.mjs G24 green && node scripts/heavy-gates.mjs G26 green && node scripts/heavy-gates.mjs G27 green",
     "test:postgres": "PG_REQUIRED=1 node --test tests/postgres.test.mjs",
-    "check:types": "tsc --noEmit --allowJs --checkJs --target es2022 --module nodenext --moduleResolution nodenext src/*.mjs",
+    "check:types": "tsc --noEmit --project quality/types/tsconfig.src.json",
     "test:property": "node --test tests/property.test.mjs",
     "nightly:soak": "node scripts/soak.mjs 20",
     "nightly:mutation": "node scripts/mutation-proof.mjs"
@@ -53,6 +53,11 @@
     "pg": "8.23.1"
   },
   "devDependencies": {
-    "@pact-foundation/pact": "17.1.4"
+    "@pact-foundation/pact": "17.1.4",
+    "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
+    "eslint": "9.39.5",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
   }
 }
