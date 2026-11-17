@@ -20,6 +20,8 @@
     "check:sbom": "npm sbom --sbom-format cyclonedx | node scripts/verify-sbom.mjs",
     "test:integration": "node --test tests/integration.test.mjs",
     "test:consumer": "node --test tests/consumer.test.mjs",
+    "test:pact:green": "node scripts/pact-contract.mjs green",
+    "test:pact:red": "node scripts/pact-contract.mjs red",
     "test:e2e": "node --test tests/e2e.test.mjs",
     "check:platform": "node scripts/platform-check.mjs",
     "quality:bootstrap": "npm install --prefix quality/tooling --no-save --package-lock=false --ignore-scripts --no-audit --no-fund eslint@9.39.5 prettier@3.6.2 typescript@5.9.3",
@@ -49,5 +51,8 @@
   },
   "dependencies": {
     "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@pact-foundation/pact": "17.1.4"
   }
 }
