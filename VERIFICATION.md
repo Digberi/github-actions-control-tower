@@ -7,6 +7,8 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| G11: generated Pact V4 consumer contract → real provider verifier; provider drops `orderId`, Pact reports missing key, artifact preserved | 🔴 EXPECTED RED, required consumer job fails | [44067822214](https://github.com/Digberi/github-actions-control-tower/actions/runs/44067822214) |
+| G11: Pact V4 mock and real Orders API provider verification restore compatible response | ✅ GREEN Pact job, JSON artifact | [44067963983](https://github.com/Digberi/github-actions-control-tower/actions/runs/44067963983) |
 | P3 nightly: actual 20s six-client HTTP soak, 88,521 order create/read cycles, 181,470 HTTP requests, 0 errors, p95 1.54ms | ✅ GREEN, JSON artifact | [43968370280](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) |
 | P3 nightly: actual seeded property tests plus `CI_DEMO_SCENARIO=unit` mutant detected by failing assertions | ✅ MUTANT KILLED, JSON evidence | [43968370280](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280) |
 | G25 PR quick soak: 3s, 16,726 HTTP requests, 0 errors, p95 2.67ms | ✅ GREEN, JSON artifact | [43968155397](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968155397) |
@@ -94,7 +96,7 @@
 - Deployment — **staging-like на ephemeral kind**, не AWS/production.
   Один перевірений digest проходить kind; actual production promotion
   із human approval немає.
-- Full-repository ESLint/TypeScript, Pact, Gitleaks, OPA, реальний Pulumi cost, cloud STS,
+- Full-repository ESLint/TypeScript, Pact Broker / can-i-deploy, history-wide Gitleaks, OPA, реальний Pulumi cost, cloud STS,
   DAST/fuzzing/mutation та частина G01–G32 — **не реалізовані повністю**.
   Деталі — у [матриці гейтів](CHECKS_MATRIX.md).
 - HTTP visualization — інтерактивна **модель** для пояснення причин/наслідків,
