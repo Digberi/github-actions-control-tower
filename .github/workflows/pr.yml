@@ -129,7 +129,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run test:consumer
       - name: Pact V4 · generated consumer contract against real Orders API
-        run: npm run test:pact:red
+        run: npm run test:pact:green
       - name: Upload G11 consumer and provider contract evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
