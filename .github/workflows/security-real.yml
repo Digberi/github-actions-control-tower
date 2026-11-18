@@ -42,6 +42,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0 # G16 must check reachable Git history, not a shallow PR snapshot
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
@@ -74,6 +75,19 @@ jobs:
           scan_code=$?
           set -e
           node scripts/g16-verdict.mjs "$MODE" "$scan_code" "reports/g16-$MODE.json"
+      - name: G16 · Inspect full reachable Git history (green security gate)
+        if: inputs.mode == 'green'
+        run: |
+          # Working-tree scan alone cannot detect a secret removed from HEAD.
+          # --all includes fetched branches and tags; --redact=100 ensures
+          # uploaded evidence never contains literal candidate secrets.
+          set +e
+          "$RUNNER_TEMP/gitleaks-bin/gitleaks" git . --log-opts="--all" \
+            --no-banner --redact=100 --report-format json \
+            --report-path "reports/g16-history.json"
+          scan_code=$?
+          set -e
+          node scripts/g16-verdict.mjs green "$scan_code" "reports/g16-history.json" history
       - name: Upload actual scanner findings and verdict even when blocked
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
