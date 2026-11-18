@@ -5,10 +5,12 @@ on:
     inputs:
       image:
         type: string
-        description: "Immutable GHCR image to scan; leave default for known-good lecture artifact"
+        description: "Immutable GHCR image; default is a previously green snapshot, not necessarily newest"
         required: true
-        default: "ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f"
+        default: "ghcr.io/digberi/github-actions-control-tower@sha256:95d3570680bc7cdb2030ab9b05019a3b5f75eda3e6fe8b4532591a3c26bf7189"
   schedule:
+    # Re-scan a known immutable snapshot for vulnerability-database drift.
+    # ci-release.yml separately scans EVERY newly published digest before deploy.
     - cron: "43 3 * * 2"
 
 permissions:
@@ -17,7 +19,7 @@ permissions:
 
 jobs:
   trivy:
-    name: "G21 · CVE HIGH/CRITICAL block on existing image"
+    name: "G21 · Re-scan pinned immutable image for new CVEs"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -30,14 +32,15 @@ jobs:
         run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
       - name: Verify target is an immutable GHCR digest
         env:
-          IMAGE: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f' }}
+          IMAGE: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:95d3570680bc7cdb2030ab9b05019a3b5f75eda3e6fe8b4532591a3c26bf7189' }}
         run: |
           node scripts/k8s-render.mjs "$IMAGE" > /dev/null
           mkdir -p reports
           echo "Scanning image: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:5d2043265842382a06efa9e66edb33b5bbe27647d01a103fc164d28a210e699f' }}
+          image-ref: ${{ inputs.image || 'ghcr.io/digberi/github-actions-control-tower@sha256:95d3570680bc7cdb2030ab9b05019a3b5f75eda3e6fe8b4532591a3c26bf7189' }}
+          scanners: vuln
           format: json
           output: reports/trivy.json
           ignore-unfixed: true

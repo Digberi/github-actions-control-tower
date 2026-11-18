@@ -4,6 +4,8 @@ The trusted `ci-release.yml` workflow uses a **single GHCR image build** and
 records the immutable registry digest. Only after G21 Trivy and the
 independent Sigstore verification pass does the workflow deploy that image:
 
+**Verified live example:** [GitHub Actions 44322304934](https://github.com/Digberi/github-actions-control-tower/actions/runs/44322304934) — all six jobs completed GREEN including the two real kind deployments and the final identity assertion.
+
 1. `staging-smoke` pulls that exact digest and checks HTTP health.
 2. `staging-kind` deploys that digest into a **real temporary kind cluster**,
    runs readiness/smoke and demonstrates an unavailable rollout + `rollout undo`.

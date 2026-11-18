@@ -27,6 +27,8 @@
 Перевірений trusted release на `main` (17.11.2026): [GHCR + Sigstore + ephemeral kind rollout/rollback GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082).
 18.11.2026 у [PR #19](https://github.com/Digberi/github-actions-control-tower/pull/19)
 Trivy пройшов на новому мінімальному runtime; [новий реліз перевіряє G21 перед kind staging](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467).
+**[Повністю перевірений реліз із двома реальними kind-кластерами та перевіркою тотожності digest (18.11.2026) →](https://github.com/Digberi/github-actions-control-tower/actions/runs/44322304934)**.
+Це справжній release flow у GitHub Actions, але **не production deploy і не native approval**.
 
 - Вибери один із шести сюжетів або один із 18 окремих gate-сценаріїв (включно з G03/G04/G07/G09).
 - Клікни на етап, щоб подивитися список гейтів.

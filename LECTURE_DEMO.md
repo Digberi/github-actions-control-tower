@@ -50,7 +50,7 @@ Required також блокує злиття. [Локальне відтвор�
 | 02:00–04:00 | Справжній повністю зелений PR | «Node 22/24, PostgreSQL 16, HTTP E2E, coverage, CodeQL, k6, CycloneDX, Docker — окремі jobs, а не виведена у README галочка» | [PR green](https://github.com/Digberi/github-actions-control-tower/pull/3/checks) |
 | 04:00–06:00 | G10 API backward compatibility | «Видалення orderId може не зламати тести producer, але ламає consumer. oasdiff перевіряє OpenAPI контракт; потрібен explicit nonzero exit» | [G10 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939) → [G10 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220), [workflow](https://github.com/Digberi/github-actions-control-tower/actions/workflows/openapi-diff.yml) |
 | 06:00–08:00 | Реальна поправка з CI | «Hadolint двічі знайшов різні проблеми Dockerfile: shell HEALTHCHECK та USER. Після fix — GREEN. Не усі червоні прогони слід приховувати» | [перший lint RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897556010) → [другий lint RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898053537) → [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898394391) |
-| 08:00–10:00 | G21 Trivy real CVE block | «Security gate має право провалити збірку. Scan з HIGH/CRITICAL вийшов exit 1, але report artifact усе одно збережений» | [Trivy RED + artifact](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840) |
+| 08:00–10:00 | G21 Trivy CVE RED → remediated GREEN | «Сканер дійсно зупинив vulnerable image. Відділили npm build toolchain від runtime, тепер Trivy блокує PR і реліз до kind» | [старий образ: RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840) → [новий PR: GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019), [реліз: G21 GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467) |
 | 10:00–13:00 | Build once, immutable digest + attestation | «Trusted main пушить GHCR digest; Sigstore зв'язує artifact із workflow; незалежний gh attestation verify; повторної збірки для deploy немає» | [verified release](https://github.com/Digberi/github-actions-control-tower/actions/runs/43897091325) |
 | 13:00–16:00 | Kind rollout, availability, rollback | «Дві репліки, readiness, bad rollout, 25 реальних HTTP probes, kubectl rollout undo, повернення попереднього digest» | [kind evidence](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894401938) |
 | 16:00–18:00 | Trust boundary та tradeoffs | «OIDC у цьому стенді перевіряється синтетично; немає AWS STS або production approval. Це показує принцип policy, але не доводить AWS інтеграцію» | [G27 RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894863175) / [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43894983037) |
@@ -90,7 +90,8 @@ npm run demo:cleanup -- --scope lecture --dry-run
 ## Ключові висновки студентам
 
 1. **Green job ≠ secure release**. GitHub reports показують факти; пороги,
-   policy та права визначають їхню цінність. Реальний Trivy тут червоний.
+   policy та права визначають їхню цінність. Спочатку реальний Trivy був RED
+   через npm CVEs; мінімальний runtime дав GREEN після виправлення.
 2. **PR ≠ trusted main**: untrusted fork не отримує publish credentials,
    publish digest відбувається лише після main merge.
 3. **Immutable image@sha256** є конкретним кандидатом для rollback. Tag може змінитися.
@@ -115,9 +116,26 @@ npm run demo:cleanup -- --scope lecture --dry-run
 
 ## Додаткові 4 хвилини: real security та deep nightly
 
-1. **G16/G19:** [реальний Gitleaks/ліцензії RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) → [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276). Обидва входять у required reusable workflow.
+1. **G16/G19:** [реальний Gitleaks/ліцензії RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965551427) → [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43965642276); [скан історії Git GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44322558962). Обидва входять у required reusable workflow.
 2. **G20:** [Trivy Kubernetes RED — 5 HIGH/CRITICAL](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966679118) → [GREEN на справжніх маніфестах](https://github.com/Digberi/github-actions-control-tower/actions/runs/43966807059).
 3. **Property fuzz:** [реальний TypeError RED](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291) → [GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021). Поясни, навіщо BigInt використано як oracle для обчислення ціни в центах.
 4. **P3:** [повний нічний прогін](https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280): 88 521 create/read циклів за 20 секунд; 181 470 HTTP, p95 1.54 мс, 0 помилок; одночасно контрольний mutant KILLED. Це не production load/DAST.
 
 Операційні кроки для ручного завершення G28/G32, AWS OIDC і чесні межі: [docs/OPERATOR_HANDOFF.md](docs/OPERATOR_HANDOFF.md).
+
+## Додаткові 4 хвилини: справжній stage → promotion digest equality
+
+Відкрий [успішний release із двома kind-кластерами](https://github.com/Digberi/github-actions-control-tower/actions/runs/44322304934):
+
+1. `Validate · Build once · Push GHCR`: зафіксуй immutable image digest.
+2. `G21 · Scan published immutable digest before promotion`: Trivy PASS;
+   підкресли, що без цього job два Kubernetes deployment були б **skipped**.
+3. `G29 · Actual kind staging deployment`: дійсний HTTP smoke, failed
+   rollout, rollback, immutable image output.
+4. `G24 · Promote staging digest to isolated kind`: **інший** kind-кластер,
+   отримує digest із виходу першого, без повторного build.
+5. `G24 · Verify both kind environments received identical digest`:
+   скачай `promotion.json`; три значення digest тотожні.
+
+Поясни обмеження: це **два реальні тимчасові kind-кластери**, але не
+виробничий deployment і не очікування human approval у GitHub Environment.
