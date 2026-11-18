@@ -1,12 +1,26 @@
-FROM node:22-alpine
+FROM node:22-alpine AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
+
+# Keep npm and its build-time dependency tree out of the runtime image.
+# The original single-stage image included vulnerable npm CLI dependencies
+# (brace-expansion, pacote, sigstore, etc.) which our application never uses.
+FROM alpine:3.24
+# hadolint ignore=DL3018
+# Alpine patches must be picked up on rebuilds; do not freeze a vulnerable
+# libstdc++ patch revision just to appease the image linter.
+RUN apk add --no-cache libstdc++ \
+    && addgroup -S -g 1000 node \
+    && adduser -S -D -u 1000 -G node node
+WORKDIR /app
+COPY --from=dependencies /usr/local/bin/node /usr/local/bin/node
+COPY --from=dependencies /app/node_modules ./node_modules
 COPY src ./src
 COPY migrations ./migrations
 ENV NODE_ENV=production
 ENV PORT=3000
-# Official Node Alpine images create the `node` account with UID/GID 1000.
+# The runtime Alpine stage explicitly creates the `node` account with UID 1000.
 # A numeric UID makes the runtime identity explicit to container policy tools.
 USER 1000
 EXPOSE 3000

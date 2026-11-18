@@ -257,6 +257,16 @@ jobs:
           persist-credentials: false
       - name: Build production image
         run: docker build --tag ci-demo:pr .
+      - name: G21 · Block PR image on fixable HIGH/CRITICAL CVEs
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ci-demo:pr
+          scanners: vuln
+          format: json
+          output: reports/trivy-pr.json
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
       - name: Boot container and verify health
         run: |
           docker run -d --name ci-demo -p 127.0.0.1:3000:3000 ci-demo:pr
@@ -268,6 +278,14 @@ jobs:
             sleep 1
           done
           exit 1
+      - name: Upload G21 scanner evidence even when PR image is blocked
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: g21-pr-image-cve-report
+          path: reports/trivy-pr.json
+          if-no-files-found: warn
+          retention-days: 14
 
   security:
     name: "G16/G19 · Real Security (reusable)"
