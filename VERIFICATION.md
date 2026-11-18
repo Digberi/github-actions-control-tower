@@ -1,12 +1,16 @@
 # Перевірені GitHub Actions — evidence ledger
 
-Станом на **17.11.2026**. Нижче — справжні публічні GitHub workflow runs,
+Станом на **18.11.2026**. Нижче — справжні публічні GitHub workflow runs,
 не намальовані позначки, не локальні симуляції. Для кожної демонстрації
 червоний статус може бути **очікуваним** — дивись причину та JSON/Markdown
 артефакти, а не лише кольорову іконку.
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| `main` #19: multi-stage image, G21 Trivy scan of published GHCR digest, Sigstore and original kind rollout/rollback | ✅ GREEN complete trusted release | [44321088467](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467) |
+| G21: multi-stage runtime contains no npm CLI; Trivy scans actual PR-built container with fixable HIGH/CRITICAL exit 1 threshold and JSON artifact; aggregate Required passes | ✅ PR G21 GREEN | [44320871019](https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019) |
+| G21: independently scans GHCR **published immutable digest** before any staging; scan step passed, JSON evidence retained | ✅ release G21 GREEN step | [44321088467](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467) |
+| G13: actual PostgreSQL 16 runs v1 legacy SELECT, additive column, real failing DROP COLUMN/SQLSTATE 42703, SAVEPOINT recovery; Required passes | ✅ PostgreSQL migration compatibility green | [44321471265](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321471265) |
 | Latest `main` release: GHCR immutable image, Sigstore attestation and independent verification, local staging smoke, real kind deployment + broken rollout/undo | ✅ GREEN complete trusted release | [44072283082](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082) |
 | Updated HTML diagram with Pact, source lint/strict checkJs, dependency-cruiser RED/GREEN evidence | ✅ GitHub Pages published | [44072283073](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283073) |
 | G14/G15: real source imported HTTP app from domain; dependency-cruiser reported prohibited layer edge **and** a circular import; required job failed, graph artifact uploaded | 🔴 EXPECTED RED, 2 real rule violations | [44071612021](https://github.com/Digberi/github-actions-control-tower/actions/runs/44071612021) |

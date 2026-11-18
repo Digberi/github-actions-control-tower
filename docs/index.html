@@ -71,6 +71,8 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43899543939">oasdiff: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43899598220">oasdiff: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy CVE: RED</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019">G21 new image: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44321471265">G13 real PostgreSQL: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179">ESLint + tsc: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276">G03 ESLint: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680">G04 TypeScript: RED</a>
@@ -92,8 +94,10 @@
     <div class="notice" role="note">
       <strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong>
       Справжні GitHub Actions перевіряють actionlint, матрицю Node/OS, ESLint/Prettier у всіх production <code>src/*.mjs</code>, strict TypeScript checkJs + DTO, PostgreSQL, coverage, Pact V4, dependency-cruiser, CodeQL, SCA/SBOM, k6, GHCR та політики.
-      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082">Найновіший trusted release: GHCR + attestation + kind staging/rollback GREEN</a>;
-      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">G21 Trivy виявив CVEs і заблокував старий image</a> — це не GREEN.
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467">Перевірений trusted release: GHCR + attestation + G21 image scan + kind staging/rollback GREEN</a>;
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">G21 Trivy заблокував старий образ через CVE в npm CLI</a>;
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019">новий мінімальний образ пройшов Trivy у PR</a>,
+      а <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467">новий GHCR digest пройшов scan перед staging</a>.
       <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43967673291">G05 property fuzz упіймав переповнення</a>,
       <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43967957021">GREEN після fix</a>;
       <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43968370280">нічний soak: 181 470 HTTP, 0 помилок; mutant killed</a>.
