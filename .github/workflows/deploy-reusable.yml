@@ -9,6 +9,10 @@ on:
       environment:
         required: true
         type: string
+    outputs:
+      deployed_image:
+        description: "Immutable digest used by a successfully verified kind deployment"
+        value: ${{ jobs.deploy.outputs.deployed_image }}
 
 permissions:
   contents: read
@@ -18,6 +22,8 @@ jobs:
     name: "kind · ${{ inputs.environment }} · digest · rollout · smoke"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      deployed_image: ${{ steps.verify_image.outputs.image }}
     environment:
       name: ${{ inputs.environment }}
     permissions:
@@ -31,10 +37,12 @@ jobs:
         with:
           node-version: 22
       - name: Verify immutable digest (no rebuild)
+        id: verify_image
         env:
           IMAGE: ${{ inputs.image }}
         run: |
           node scripts/k8s-render.mjs "$IMAGE" > /dev/null
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
           echo "Image reference: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
       - name: Create ephemeral Kubernetes
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0

@@ -149,3 +149,64 @@ jobs:
     with:
       image: ${{ needs.publish.outputs.image }}
       environment: demo-staging
+
+  promotion-kind:
+    name: "G24 · Promote staging digest to isolated kind (NOT real production)"
+    needs: [publish, image-security, staging-smoke, staging-kind]
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      # Pass the SUCCESSFUL staging deployment's recorded digest, not a tag
+      # or a second build result. This is an ephemeral second kind cluster.
+      image: ${{ needs.staging-kind.outputs.deployed_image }}
+      environment: demo-promotion-kind
+
+  promotion-evidence:
+    name: "G24 · Verify both kind environments received identical digest"
+    needs: [publish, staging-kind, promotion-kind]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Compare actual staging and promotion outputs
+        env:
+          PUBLISHED: ${{ needs.publish.outputs.image }}
+          STAGING: ${{ needs.staging-kind.outputs.deployed_image }}
+          PROMOTED: ${{ needs.promotion-kind.outputs.deployed_image }}
+        run: |
+          case "$PUBLISHED" in
+            *@sha256:*) ;;
+            *) echo "G24: release image was not immutable" >&2; exit 1 ;;
+          esac
+          test "$PUBLISHED" = "$STAGING"
+          test "$STAGING" = "$PROMOTED"
+          mkdir -p reports
+          node -e '
+            const { writeFileSync } = require("node:fs");
+            const image = process.env.PUBLISHED;
+            const report = {
+              source: "GITHUB_REAL_TWO_EPHEMERAL_KIND_CLUSTERS",
+              releaseSha: process.env.GITHUB_SHA,
+              runId: process.env.GITHUB_RUN_ID,
+              published: image,
+              staging: process.env.STAGING,
+              promotion: process.env.PROMOTED,
+              immutableDigestMatches: true,
+              nativeApproval: false,
+              productionDeployment: false,
+              timestamp: new Date().toISOString()
+            };
+            writeFileSync("reports/promotion.json", JSON.stringify(report, null, 2) + "\n");
+          '
+          echo "G24: immutable digest matches across publish, staging and second kind cluster" >> "$GITHUB_STEP_SUMMARY"
+          echo "This is an approval-free teaching rehearsal, not production." >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve stage-to-promotion identity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: g24-two-kind-promotion-evidence
+          path: reports/promotion.json
+          if-no-files-found: warn
+          retention-days: 14

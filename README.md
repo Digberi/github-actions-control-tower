@@ -13,6 +13,10 @@
 **Налаштування, які потребують прав власника / AWS:** [docs/OPERATOR_HANDOFF.md](docs/OPERATOR_HANDOFF.md).
 **Для проведення лекції:** [18-хвилинний сценарій із прямими посиланнями на GREEN/RED jobs](LECTURE_DEMO.md).
 
+**Нові поглиблені приклади:** [G13 real PostgreSQL expand/contract](docs/G13_POSTGRES_MIGRATION.md),
+[G21 Trivy RED→GREEN](CHECKS_MATRIX.md),
+[G24 immutable staging→second kind promotion](docs/G24_KIND_PROMOTION.md).
+
 ## Інтерактивна візуалізація
 
 Відкрий [docs/index.html](docs/index.html) у браузері: схема працює
@@ -20,7 +24,9 @@
 
 **[Відкрити опубліковану інтерактивну демонстрацію →](https://digberi.github.io/github-actions-control-tower/)**
 
-Остання перевірка всього trusted release на `main` (17.11.2026): [GHCR + Sigstore + ephemeral kind rollout/rollback GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082).
+Перевірений trusted release на `main` (17.11.2026): [GHCR + Sigstore + ephemeral kind rollout/rollback GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44072283082).
+18.11.2026 у [PR #19](https://github.com/Digberi/github-actions-control-tower/pull/19)
+Trivy пройшов на новому мінімальному runtime; [новий реліз перевіряє G21 перед kind staging](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467).
 
 - Вибери один із шести сюжетів або один із 18 окремих gate-сценаріїв (включно з G03/G04/G07/G09).
 - Клікни на етап, щоб подивитися список гейтів.

@@ -80,8 +80,16 @@ IAM trust policies automatically**.
 - G19: actual installed npm dependency license metadata, strict allowlist;
   no complete SPDX license text verification.
 - G20: real Trivy Kubernetes config scan; no custom OPA/Rego policy pack.
-- G21: [Trivy HIGH/CRITICAL RED report](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840)
-  on a known immutable image; don't call it a remediated green image scan.
+- G21: [Old image RED report](https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840)
+  found fixable HIGH CVEs in bundled npm CLI dependencies. PR #19 removed npm
+  from the Alpine runtime and added mandatory PR + post-publish Trivy checks;
+  [the new PR scan is GREEN](https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019).
+  The [trusted release's exact digest scan](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467)
+  also passed before staging. A green finding is time-dependent; rescan new
+  images, don't assume future releases are vulnerability-free.
+- G24: the optional second kind cluster exercises actual digest promotion
+  without changing registry artifact identity. It is **not** real production
+  promotion and has **no native required reviewers**.
 - G25: actual k6, plus PR short soak and 20s scheduled soak. These are not
   production load or chaos testing.
 - G26/G27: see cloud limitations above.
