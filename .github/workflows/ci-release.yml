@@ -73,9 +73,43 @@ jobs:
           IMAGE: ${{ steps.digest.outputs.image }}
         run: gh attestation verify "oci://$IMAGE" -R "$GITHUB_REPOSITORY"
 
+  image-security:
+    name: "G21 · Scan published immutable digest before promotion"
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Authenticate to GHCR (read-only)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Prepare G21 evidence directory
+        run: mkdir -p reports
+      - name: Scan exact published digest, fail on fixable HIGH/CRITICAL CVEs
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ needs.publish.outputs.image }}
+          scanners: vuln
+          format: json
+          output: reports/trivy-release.json
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+      - name: Preserve release scanner evidence even if promotion is blocked
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: g21-release-image-cve-report
+          path: reports/trivy-release.json
+          if-no-files-found: warn
+          retention-days: 14
+
   staging-smoke:
     name: "Staging simulation · Same immutable digest"
-    needs: publish
+    needs: [publish, image-security]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -107,7 +141,7 @@ jobs:
           exit 1
   staging-kind:
     name: "G29 · Actual kind staging deployment"
-    needs: publish
+    needs: [publish, image-security]
     permissions:
       contents: read
       packages: read
