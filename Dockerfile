@@ -7,9 +7,9 @@ RUN npm ci --omit=dev --ignore-scripts
 # The original single-stage image included vulnerable npm CLI dependencies
 # (brace-expansion, pacote, sigstore, etc.) which our application never uses.
 FROM alpine:3.24
-# hadolint ignore=DL3018
 # Alpine patches must be picked up on rebuilds; do not freeze a vulnerable
 # libstdc++ patch revision just to appease the image linter.
+# hadolint ignore=DL3018
 RUN apk add --no-cache libstdc++ \
     && addgroup -S -g 1000 node \
     && adduser -S -D -u 1000 -G node node

@@ -257,6 +257,8 @@ jobs:
           persist-credentials: false
       - name: Build production image
         run: docker build --tag ci-demo:pr .
+      - name: Prepare G21 evidence directory
+        run: mkdir -p reports
       - name: G21 · Block PR image on fixable HIGH/CRITICAL CVEs
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
