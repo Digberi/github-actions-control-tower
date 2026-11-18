@@ -7,6 +7,8 @@
 
 | Механізм | Результат | Справжній GitHub run |
 |---|---|---|
+| Complete trusted `main`: GHCR immutable digest, Sigstore, fixable HIGH/CRITICAL G21 Trivy, staging kind, **second independent promotion kind**, rollout/rollback, final G24 three-way digest equality and uploaded `promotion.json` | ✅ GREEN SIX JOBS (NO REAL PRODUCTION) | [44322304934](https://github.com/Digberi/github-actions-control-tower/actions/runs/44322304934) |
+| G16: checksum-verified Gitleaks scanned full fetched reachable Git history **and** working tree; each JSON verdict preserved, both exit 0, required PR job green | ✅ G16 FULL HISTORY GREEN | [44322558962](https://github.com/Digberi/github-actions-control-tower/actions/runs/44322558962) |
 | `main` #19: multi-stage image, G21 Trivy scan of published GHCR digest, Sigstore and original kind rollout/rollback | ✅ GREEN complete trusted release | [44321088467](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467) |
 | G21: multi-stage runtime contains no npm CLI; Trivy scans actual PR-built container with fixable HIGH/CRITICAL exit 1 threshold and JSON artifact; aggregate Required passes | ✅ PR G21 GREEN | [44320871019](https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019) |
 | G21: independently scans GHCR **published immutable digest** before any staging; scan step passed, JSON evidence retained | ✅ release G21 GREEN step | [44321088467](https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467) |

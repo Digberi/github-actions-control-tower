@@ -6,7 +6,7 @@ Kubernetes IaC and nightly soak/mutation have **real GitHub Actions runs**.
 The HTML diagram depicts the *target topology*; do not present it as live
 telemetry or claim all 32 gates are production-complete.
 
-Last audited 2026-11-16. The following work cannot honestly be called
+Last audited 2026-11-18. The following work cannot honestly be called
 finished without additional infrastructure, privileges or scope decisions.
 
 ## A. Make G32 physically prevent merging (repository admin)
@@ -37,8 +37,9 @@ https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-
 
 ## B. G28 production approval and real promotion
 
-The release currently builds once, pushes an immutable `@sha256`, verifies
-provenance and deploys to a **temporary kind cluster**. There is no paid
+The release now builds once, scans a published immutable `@sha256`, verifies
+provenance and deploys to **two separate temporary kind clusters** to show
+digest promotion. This is an unprotected kind teaching rehearsal. There is no paid
 production Kubernetes/ECS target, nor an approved owner/reviewer.
 
 To demonstrate *real* environment approval rather than a fake simulated
@@ -73,10 +74,12 @@ IAM trust policies automatically**.
 - G04: strict TypeScript `checkJs` covers all production `src/*.mjs` with JSDoc plus a typed DTO fixture; backend remains JavaScript.
 - G11: genuine Pact V4 consumer-generated contract verified through HTTP against the real provider; no Pact Broker or `can-i-deploy`.
 - G12: optional — this sample API does not emit messages to Kafka/RabbitMQ.
-- G13: a narrow expand-only SQL migration validator, not a complete migration analyzer.
+- G13: real PostgreSQL v1-reader/expand/broken-contract/savepoint recovery test
+  supplements the fast SQL fixture. Not a production online migration analyzer.
 - G14/G15: actual dependency-cruiser 18 validates production import boundaries and cycles in a blocking job; does not inspect runtime dependency edges.
-- G16: actual Gitleaks scans checked-out files; full git-history scanning
-  remains optional.
+- G16: actual checksum-verified Gitleaks scans both current working tree and
+  full fetched reachable Git history in required PR security job; no fork-only,
+  unreachable or privately hosted refs are covered.
 - G19: actual installed npm dependency license metadata, strict allowlist;
   no complete SPDX license text verification.
 - G20: real Trivy Kubernetes config scan; no custom OPA/Rego policy pack.

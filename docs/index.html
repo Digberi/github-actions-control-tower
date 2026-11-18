@@ -73,6 +73,8 @@
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">Trivy CVE: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019">G21 new image: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44321471265">G13 real PostgreSQL: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44322558962">G16 Git history: GREEN</a>
+        <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44322304934">G24 two kind clusters: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43953383179">ESLint + tsc: GREEN</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954058276">G03 ESLint: RED</a>
         <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43954113680">G04 TypeScript: RED</a>
@@ -94,7 +96,8 @@
     <div class="notice" role="note">
       <strong>Сценарії нижче — симуляція залежностей, не live-телеметрія.</strong>
       Справжні GitHub Actions перевіряють actionlint, матрицю Node/OS, ESLint/Prettier у всіх production <code>src/*.mjs</code>, strict TypeScript checkJs + DTO, PostgreSQL, coverage, Pact V4, dependency-cruiser, CodeQL, SCA/SBOM, k6, GHCR та політики.
-      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467">Перевірений trusted release: GHCR + attestation + G21 image scan + kind staging/rollback GREEN</a>;
+      <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44322304934">Перевірений trusted release: GHCR + G21 + Sigstore + staging kind + другий kind + G24 digest identity GREEN</a>;
+      production approval і AWS deploy не налаштовані.
       <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/43898137840">G21 Trivy заблокував старий образ через CVE в npm CLI</a>;
       <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44320871019">новий мінімальний образ пройшов Trivy у PR</a>,
       а <a href="https://github.com/Digberi/github-actions-control-tower/actions/runs/44321088467">новий GHCR digest пройшов scan перед staging</a>.
